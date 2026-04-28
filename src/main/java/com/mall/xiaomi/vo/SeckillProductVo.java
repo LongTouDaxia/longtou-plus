@@ -1,6 +1,6 @@
 package com.mall.xiaomi.vo;
 
-import com.mall.xiaomi.pojo.SeckillProduct;
+import com.mall.xiaomi.entity.SeckillProduct;
 import lombok.Data;
 
 import java.io.Serializable;

@@ -1,11 +1,12 @@
 package com.mall.xiaomi.controller;
 
-import com.mall.xiaomi.pojo.User;
+import com.mall.xiaomi.entity.User;
+import com.mall.xiaomi.service.Imp.UserServiceImp;
 import com.mall.xiaomi.service.UserService;
 import com.mall.xiaomi.util.BeanUtil;
 import com.mall.xiaomi.util.CookieUtil;
 import com.mall.xiaomi.util.MD5Util;
-import com.mall.xiaomi.util.ResultMessage;
+import com.mall.xiaomi.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -24,8 +25,7 @@ import java.util.concurrent.TimeUnit;
 @RequestMapping("/user")
 public class UserController {
 
-    @Autowired
-    private ResultMessage resultMessage;
+
     @Autowired
     private RedisTemplate redisTemplate;
     @Autowired
@@ -39,7 +39,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/login")
-    public ResultMessage login(@RequestBody User user, HttpServletRequest request, HttpServletResponse response) {
+    public Result login(@RequestBody User user, HttpServletRequest request, HttpServletResponse response) {
         user = userService.login(user);
         // 添加cookie，设置唯一认证
         String encode = MD5Util.MD5Encode(user.getUsername() + user.getPassword(), "UTF-8");
@@ -55,8 +55,7 @@ public class UserController {
         }
         // 将密码设为null,返回给前端
         user.setPassword(null);
-        resultMessage.success("001", "登录成功", user);
-        return resultMessage;
+        return Result.success("登陆成功",user);
     }
 
     /**
@@ -65,10 +64,9 @@ public class UserController {
      * @return
      */
     @PostMapping("/register")
-    public ResultMessage register(@RequestBody User user) {
+    public Result register(@RequestBody User user) {
         userService.register(user);
-        resultMessage.success("001", "注册成功");
-        return resultMessage;
+        return Result.success("注册成功");
     }
 
     /**
@@ -77,10 +75,9 @@ public class UserController {
      * @return
      */
     @GetMapping("/username/{username}")
-    public ResultMessage username(@PathVariable String username) {
+    public Result username(@PathVariable String username) {
         userService.isUserName(username);
-        resultMessage.success("001", "可注册");
-        return resultMessage;
+        return Result.success("可注册");
     }
 
     /**
@@ -89,21 +86,19 @@ public class UserController {
      * @return
      */
     @GetMapping("/token")
-    public ResultMessage token(@CookieValue("XM_TOKEN") String token, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public Result token(@CookieValue("XM_TOKEN") String token, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Map map = redisTemplate.opsForHash().entries(token);
         // 可能map为空 ， 即redis中时间已过期，但是cookie还存在。
         // 这个时候应该删除cookie，让用户重新登录
         if (map.isEmpty()) {
             CookieUtil.delCookie(request, token);
-            resultMessage.fail("002", "账号过期,请重新登录");
-            return resultMessage;
+            return Result.error("账号过期,请重新登录");
         }
 
         redisTemplate.expire(token, 30 * 60, TimeUnit.SECONDS); // 设置过期时间
         User user = BeanUtil.map2bean(map, User.class);
         user.setPassword(null);
-        resultMessage.success("001", user);
-        return resultMessage;
+        return Result.success(user);
     }
 
 }

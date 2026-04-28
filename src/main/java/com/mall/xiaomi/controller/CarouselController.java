@@ -1,8 +1,9 @@
 package com.mall.xiaomi.controller;
 
-import com.mall.xiaomi.pojo.Carousel;
+import com.mall.xiaomi.entity.Carousel;
 import com.mall.xiaomi.service.CarouselService;
-import com.mall.xiaomi.util.ResultMessage;
+import com.mall.xiaomi.service.Imp.CarouselServiceImp;
+import com.mall.xiaomi.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,16 +18,14 @@ import java.util.List;
 @RestController
 public class CarouselController {
 
-    @Autowired
-    private ResultMessage resultMessage;
+
     @Autowired
     private CarouselService carouselService;
 
     @GetMapping("/resources/carousel")
-    public ResultMessage carousels() {
+    public Result carousels() {
         List<Carousel> carousels = carouselService.getCarouselList();
-        resultMessage.success("001", carousels);
-        return resultMessage;
+        return Result.success(carousels);
     }
 
 }

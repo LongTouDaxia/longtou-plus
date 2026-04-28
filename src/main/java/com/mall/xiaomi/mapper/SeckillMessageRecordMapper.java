@@ -1,6 +1,6 @@
 package com.mall.xiaomi.mapper;
 
-import com.mall.xiaomi.pojo.SeckillMessageRecord;
+import com.mall.xiaomi.entity.SeckillMessageRecord;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -18,7 +18,7 @@ public interface SeckillMessageRecordMapper {
 
     int updateByPrimaryKey(SeckillMessageRecord record);
 
-    com.mall.xiaomi.pojo.SeckillMessageRecord findByMessageId(@Param("correlationId") String correlationId);
+    com.mall.xiaomi.entity.SeckillMessageRecord findByMessageId(@Param("correlationId") String correlationId);
 
     int updateByMessageId(@Param("record") SeckillMessageRecord record);
 }

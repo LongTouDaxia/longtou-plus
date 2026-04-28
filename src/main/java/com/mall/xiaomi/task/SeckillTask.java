@@ -3,10 +3,8 @@ package com.mall.xiaomi.task;
 import com.mall.xiaomi.mapper.ProductMapper;
 import com.mall.xiaomi.mapper.SeckillProductMapper;
 import com.mall.xiaomi.mapper.SeckillTimeMapper;
-import com.mall.xiaomi.pojo.Product;
-import com.mall.xiaomi.pojo.SeckillProduct;
-import com.mall.xiaomi.pojo.SeckillTime;
-import com.mall.xiaomi.service.SeckillProductService;
+import com.mall.xiaomi.entity.SeckillProduct;
+import com.mall.xiaomi.entity.SeckillTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -67,6 +65,7 @@ public class SeckillTask {
                 seckillProduct.setTimeId(seckillTime.getTimeId());
                 seckillProducts.add(seckillProduct);
             }
+
 
             seckillProductMapper.insertList(seckillProducts);
             // System.out.println(Arrays.toString(seckillProducts.toArray()));

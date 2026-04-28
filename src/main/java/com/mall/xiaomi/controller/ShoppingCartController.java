@@ -1,8 +1,8 @@
 package com.mall.xiaomi.controller;
 
-import com.mall.xiaomi.pojo.ShoppingCart;
+import com.mall.xiaomi.service.Imp.ShoppingCartServiceImp;
 import com.mall.xiaomi.service.ShoppingCartService;
-import com.mall.xiaomi.util.ResultMessage;
+import com.mall.xiaomi.util.Result;
 import com.mall.xiaomi.vo.CartVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +18,9 @@ import java.util.List;
 @RequestMapping("/cart")
 public class ShoppingCartController {
 
+
         @Autowired
-        private ResultMessage resultMessage;
-        @Autowired
-        private ShoppingCartService cartService;
+        private ShoppingCartService shoppingCartService;
 
         /**
          * 获取购物车信息
@@ -30,10 +29,9 @@ public class ShoppingCartController {
          * @return
          */
         @GetMapping("/user/{userId}")
-        public ResultMessage cart(@PathVariable String userId) {
-                List<CartVo> carts = cartService.getCartByUserId(userId);
-                resultMessage.success("001", carts);
-                return resultMessage;
+        public Result cart(@PathVariable String userId) {
+                List<CartVo> carts = shoppingCartService.getCartByUserId(userId);
+                return Result.success(carts);
         }
 
         /**
@@ -44,32 +42,30 @@ public class ShoppingCartController {
          * @return
          */
         @PostMapping("/product/user/{productId}/{userId}")
-        public ResultMessage cart(@PathVariable String productId, @PathVariable String userId) {
-                CartVo cartVo = cartService.addCart(productId, userId);
+        public Result cart(@PathVariable String productId, @PathVariable String userId) {
+                CartVo cartVo = shoppingCartService.addCart(productId, userId);
 
                 if (cartVo != null) {
 
                         if (cartVo.isUpdateNum()) {
-                                resultMessage.success("002", "添加购物车成功", cartVo.getUpdateMessage());
+                                Result.success( "添加购物车成功", cartVo.getUpdateMessage());
                         }
-                        resultMessage.success("001", "添加购物车成功", cartVo);
+                        Result.success("添加购物车成功", cartVo);
                 } else {
-                        resultMessage.success("002", "该商品已经在购物车，数量+1");
+                        Result.success("该商品已经在购物车，数量+1");
                 }
-                return resultMessage;
+                return Result.success("添加成功");
         }
 
         @PutMapping("/user/num/{cartId}/{userId}/{num}")
-        public ResultMessage cart(@PathVariable String cartId, @PathVariable String userId, @PathVariable String num) {
-                cartService.updateCartNum(cartId, userId, num);
-                resultMessage.success("001", "更新成功");
-                return resultMessage;
+        public Result cart(@PathVariable String cartId, @PathVariable String userId, @PathVariable String num) {
+                shoppingCartService.updateCartNum(cartId, userId, num);
+                return Result.success("更新成功");
         }
 
         @DeleteMapping("/user/{cartId}/{userId}")
-        public ResultMessage deleteCart(@PathVariable String cartId, @PathVariable String userId) {
-                cartService.deleteCart(cartId, userId);
-                resultMessage.success("001", "删除成功");
-                return resultMessage;
+        public Result deleteCart(@PathVariable String cartId, @PathVariable String userId) {
+                shoppingCartService.deleteCart(cartId, userId);
+                return Result.success("删除成功");
         }
 }

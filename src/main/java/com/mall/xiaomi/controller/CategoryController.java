@@ -1,8 +1,9 @@
 package com.mall.xiaomi.controller;
 
-import com.mall.xiaomi.pojo.Category;
+import com.mall.xiaomi.entity.Category;
 import com.mall.xiaomi.service.CategoryService;
-import com.mall.xiaomi.util.ResultMessage;
+import com.mall.xiaomi.service.Imp.CategoryServiceImp;
+import com.mall.xiaomi.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,16 +20,14 @@ import java.util.List;
 @RequestMapping("/category")
 public class CategoryController {
 
-    @Autowired
-    private ResultMessage resultMessage;
+
     @Autowired
     private CategoryService categoryService;
 
     @GetMapping("")
-    public ResultMessage category() {
+    public Result category() {
         List<Category> categories = categoryService.getAll();
-        resultMessage.success("001", categories);
-        return resultMessage;
+        return Result.success(categories);
     }
 
 }

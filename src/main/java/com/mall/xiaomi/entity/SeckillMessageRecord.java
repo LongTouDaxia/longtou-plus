@@ -1,8 +1,10 @@
-package com.mall.xiaomi.pojo;
+package com.mall.xiaomi.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -10,8 +12,13 @@ import java.util.Date;
  * seckill_message_record
  */
 @Data
-@Table(name = "seckill_message_record")
+@TableName("seckill_message_record")
 public class SeckillMessageRecord implements Serializable {
+
+
+    private static final long serialVersionUID = 1L;
+
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     private String messageId;
@@ -30,5 +37,4 @@ public class SeckillMessageRecord implements Serializable {
 
     private Date updatedAt;
 
-    private static final long serialVersionUID = 1L;
 }

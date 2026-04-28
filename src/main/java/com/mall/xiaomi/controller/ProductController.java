@@ -1,9 +1,10 @@
 package com.mall.xiaomi.controller;
 
 import com.github.pagehelper.PageInfo;
-import com.mall.xiaomi.pojo.Product;
+import com.mall.xiaomi.entity.Product;
+import com.mall.xiaomi.service.Imp.ProductServiceImp;
 import com.mall.xiaomi.service.ProductService;
-import com.mall.xiaomi.util.ResultMessage;
+import com.mall.xiaomi.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,42 +21,38 @@ import java.util.Map;
 @RequestMapping("/product")
 public class ProductController {
 
-    @Autowired
-    private ResultMessage resultMessage;
+
     @Autowired
     private ProductService productService;
 
     @GetMapping("/category/limit/{categoryId}")
-    public ResultMessage getProductByCategoryId(@PathVariable Integer categoryId) {
+    public Result getProductByCategoryId(@PathVariable Integer categoryId) {
         List<Product> list = productService.getProductByCategoryId(categoryId);
-        resultMessage.success("001", list);
-        return resultMessage;
+        return Result.success(list);
 
     }
 
     @GetMapping("/category/hot")
-    public ResultMessage getHotProduct() {
+    public Result getHotProduct() {
         List<Product> list = productService.getHotProduct();
-        resultMessage.success("001", list);
-        return resultMessage;
+        return Result.success(list);
 
     }
 
     @GetMapping("/{productId}")
-    public ResultMessage getProduct(@PathVariable String productId) {
+    public Result getProduct(@PathVariable String productId) {
         Product product = productService.getProductById(productId);
-        resultMessage.success("001", product);
-        return resultMessage;
+        return Result.success(product);
     }
 
     @GetMapping("/page/{currentPage}/{pageSize}/{categoryId}")
-    public Map<String, Object> getProductByPage(@PathVariable String currentPage, @PathVariable String pageSize, @PathVariable String categoryId) {
+    public Result getProductByPage(@PathVariable String currentPage, @PathVariable String pageSize, @PathVariable String categoryId) {
         PageInfo<Product> pageInfo = productService.getProductByPage(currentPage, pageSize, categoryId);
         HashMap<String, Object> map = new HashMap<>();
         map.put("code", "001");
         map.put("data", pageInfo.getList());
         map.put("total", pageInfo.getTotal());
-        return map;
+        return Result.success(map);
     }
 
 }

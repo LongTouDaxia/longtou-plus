@@ -1,19 +1,16 @@
 package com.mall.xiaomi.controller;
 
-import com.github.pagehelper.PageInfo;
-import com.mall.xiaomi.pojo.Product;
-import com.mall.xiaomi.pojo.SeckillProduct;
-import com.mall.xiaomi.pojo.SeckillTime;
+import com.mall.xiaomi.entity.SeckillProduct;
+import com.mall.xiaomi.entity.SeckillTime;
+import com.mall.xiaomi.service.Imp.SeckillProductServiceImp;
 import com.mall.xiaomi.service.SeckillProductService;
-import com.mall.xiaomi.util.ResultMessage;
+import com.mall.xiaomi.util.Result;
 import com.mall.xiaomi.vo.SeckillProductVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Auther: wdd
@@ -24,8 +21,7 @@ import java.util.Map;
 @RequestMapping("/seckill/product")
 public class SeckillProductController {
 
-    @Autowired
-    private ResultMessage resultMessage;
+
     @Autowired
     private SeckillProductService seckillProductService;
     @Autowired
@@ -37,10 +33,9 @@ public class SeckillProductController {
      * @return
      */
     @GetMapping("/time/{timeId}")
-    public ResultMessage getProduct(@PathVariable String timeId) {
+    public Result getProduct(@PathVariable String timeId) {
         List<SeckillProductVo> seckillProductVos = seckillProductService.getProduct(timeId);
-        resultMessage.success("001", seckillProductVos);
-        return resultMessage;
+        return Result.success(seckillProductVos);
     }
 
     /**
@@ -49,10 +44,9 @@ public class SeckillProductController {
      * @return
      */
     @GetMapping("/{seckillId}")
-    public ResultMessage getSeckill(@PathVariable String seckillId) {
+    public Result getSeckill(@PathVariable String seckillId) {
         SeckillProductVo seckillProductVo = seckillProductService.getSeckill(seckillId);
-        resultMessage.success("001", seckillProductVo);
-        return resultMessage;
+        return Result.success(seckillProductVo);
     }
 
     /**
@@ -60,10 +54,9 @@ public class SeckillProductController {
      * @return
      */
     @GetMapping("/time")
-    public ResultMessage getTime() {
+    public Result getTime() {
         List<SeckillTime> seckillTimes = seckillProductService.getTime();
-        resultMessage.success("001", seckillTimes);
-        return resultMessage;
+        return Result.success(seckillTimes);
     }
 
     /**
@@ -72,10 +65,10 @@ public class SeckillProductController {
      * @return
      */
     @PostMapping("")
-    public ResultMessage addSeckillProduct(@RequestBody SeckillProduct seckillProduct) {
+    public Result addSeckillProduct(@RequestBody SeckillProduct seckillProduct) {
         seckillProductService.addSeckillProduct(seckillProduct);
-        resultMessage.success("001", "添加成功");
-        return resultMessage;
+
+        return Result.success("添加成功");
     }
 
     /**
@@ -84,12 +77,11 @@ public class SeckillProductController {
      * @return
      */
     @PostMapping("/seckill/{seckillId}")
-    public ResultMessage seckillProduct(@PathVariable String seckillId, @CookieValue("XM_TOKEN") String cookie) {
+    public Result seckillProduct(@PathVariable String seckillId, @CookieValue("XM_TOKEN") String cookie) {
         // 先判断cookie是否存在，和redis校验
         Integer userId = (Integer) redisTemplate.opsForHash().get(cookie, "userId");
         seckillProductService.seckillProduct(seckillId, userId);
-        resultMessage.success("001", "排队中");
-        return resultMessage;
+        return Result.success("排队中");
     }
 
 

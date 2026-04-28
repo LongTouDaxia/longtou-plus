@@ -1,10 +1,11 @@
 package com.mall.xiaomi.mapper;
 
-import com.mall.xiaomi.pojo.ShoppingCart;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.mall.xiaomi.entity.ShoppingCart;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import tk.mybatis.mapper.common.Mapper;
-
-public interface ShoppingCartMapper extends Mapper<ShoppingCart> {
+@Mapper
+public interface ShoppingCartMapper extends BaseMapper<ShoppingCart> {
 
         int updateCartByIdAndVersion(@Param("cart") ShoppingCart cart);
 }

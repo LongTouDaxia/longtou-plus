@@ -1,11 +1,10 @@
-package com.mall.xiaomi.pojo;
+package com.mall.xiaomi.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.io.Serializable;
 
 /**
@@ -14,11 +13,10 @@ import java.io.Serializable;
  * @Description:
  */
 @Data
-@Table(name = "seckill_product")
+@TableName("seckill_product")
 public class SeckillProduct implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY,generator = "JDBC")
+    @TableId(type = IdType.AUTO)
     private Integer seckillId;
 
     private Integer productId;

@@ -1,9 +1,7 @@
 package com.mall.xiaomi.vo;
 
-import com.mall.xiaomi.pojo.Order;
+import com.mall.xiaomi.entity.Order;
 import lombok.Data;
-
-import java.util.Date;
 
 /**
  * @Auther: wdd

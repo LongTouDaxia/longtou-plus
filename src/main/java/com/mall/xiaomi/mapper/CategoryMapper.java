@@ -1,8 +1,10 @@
 package com.mall.xiaomi.mapper;
 
-import com.mall.xiaomi.pojo.Category;
-import tk.mybatis.mapper.common.Mapper;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.mall.xiaomi.entity.Category;
+import org.apache.ibatis.annotations.Mapper;
 
-public interface CategoryMapper extends Mapper<Category> {
+@Mapper
+public interface CategoryMapper extends BaseMapper<Category> {
 
 }

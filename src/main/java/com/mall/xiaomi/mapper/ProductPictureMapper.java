@@ -1,8 +1,10 @@
 package com.mall.xiaomi.mapper;
 
-import com.mall.xiaomi.pojo.ProductPicture;
-import tk.mybatis.mapper.common.Mapper;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.mall.xiaomi.entity.ProductPicture;
+import org.apache.ibatis.annotations.Mapper;
 
-public interface ProductPictureMapper extends Mapper<ProductPicture> {
+@Mapper
+public interface ProductPictureMapper extends BaseMapper<ProductPicture> {
 
 }

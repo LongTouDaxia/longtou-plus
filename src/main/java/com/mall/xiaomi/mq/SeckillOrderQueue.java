@@ -2,9 +2,9 @@ package com.mall.xiaomi.mq;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mall.xiaomi.mapper.SeckillMessageRecordMapper;
-import com.mall.xiaomi.pojo.SeckillMessageRecord;
-import com.mall.xiaomi.service.OrderService;
-import com.mall.xiaomi.service.SeckillProductService;
+import com.mall.xiaomi.entity.SeckillMessageRecord;
+import com.mall.xiaomi.service.Imp.OrderServiceImp;
+import com.mall.xiaomi.service.Imp.SeckillProductServiceImp;
 import com.mall.xiaomi.util.RedisKey;
 import com.rabbitmq.client.Channel;
 import org.springframework.amqp.core.Message;
@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @Auther: wdd
@@ -31,9 +30,9 @@ public class SeckillOrderQueue {
 
         private static final String RETRY_COUNT_KEY_PREFIX = "retryCount:";
         @Autowired
-        private OrderService orderService;
+        private OrderServiceImp orderService;
         @Autowired
-        private SeckillProductService seckillProductService;
+        private SeckillProductServiceImp seckillProductService;
         @Autowired
         StringRedisTemplate stringRedisTemplate;
 

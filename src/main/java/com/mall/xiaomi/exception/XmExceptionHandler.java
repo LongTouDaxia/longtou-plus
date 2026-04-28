@@ -1,6 +1,6 @@
 package com.mall.xiaomi.exception;
 
-import com.mall.xiaomi.util.ResultMessage;
+import com.mall.xiaomi.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class XmExceptionHandler {
 
     @Autowired
-    private ResultMessage resultMessage;
+    private Result result;
 
     @ExceptionHandler(XmException.class)
-    public ResultMessage handleException(XmException e){
+    public Result handleException(XmException e){
         ExceptionEnum em = e.getExceptionEnum();
-        resultMessage.fail(em.getCode() + "", em.getMsg());
-        return resultMessage;
+        result.fail(em.getCode() + "", em.getMsg());
+        return result;
     }
 }

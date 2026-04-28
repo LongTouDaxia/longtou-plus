@@ -1,14 +1,15 @@
-package com.mall.xiaomi.pojo;
+package com.mall.xiaomi.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import javax.persistence.*;
 
 @Data
-@Table(name = "shopping_cart")
+@TableName("shopping_cart")
 public class ShoppingCart {
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "JDBC")
+        @TableId(type = IdType.AUTO)
         private Integer id;
 
         private Integer userId;

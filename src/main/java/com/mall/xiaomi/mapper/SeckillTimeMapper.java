@@ -1,10 +1,10 @@
 package com.mall.xiaomi.mapper;
 
-import com.mall.xiaomi.pojo.SeckillTime;
-import com.mall.xiaomi.vo.SeckillProductVo;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.mall.xiaomi.entity.SeckillTime;
 import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
-import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
 
@@ -13,7 +13,9 @@ import java.util.List;
  * @Date: 2020-04-22 20:58
  * @Description:
  */
-public interface SeckillTimeMapper extends Mapper<SeckillTime> {
+
+@Mapper
+public interface SeckillTimeMapper extends BaseMapper<SeckillTime> {
 
         @Select("select * from seckill_time where end_time > #{time} limit 6")
         List<SeckillTime> getTime(long time);

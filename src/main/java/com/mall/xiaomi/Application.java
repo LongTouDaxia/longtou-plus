@@ -20,6 +20,7 @@ import javax.annotation.PostConstruct;
  */
 @SpringBootApplication
 @MapperScan("com.mall.xiaomi.mapper")
+
 @EnableScheduling
 public class Application {
         public static void main(String[] args) {

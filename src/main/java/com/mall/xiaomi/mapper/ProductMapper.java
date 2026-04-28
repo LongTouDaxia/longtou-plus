@@ -1,13 +1,15 @@
 package com.mall.xiaomi.mapper;
 
-import com.mall.xiaomi.pojo.Product;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.mall.xiaomi.entity.Product;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
 
-public interface ProductMapper extends Mapper<Product> {
+@Mapper
+public interface ProductMapper extends BaseMapper<Product> {
 
         @Select("select product_id from product")
         List<Integer> selectIds();

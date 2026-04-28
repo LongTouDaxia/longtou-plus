@@ -1,8 +1,9 @@
 package com.mall.xiaomi.controller;
 
-import com.mall.xiaomi.pojo.Product;
+import com.mall.xiaomi.entity.Product;
 import com.mall.xiaomi.service.CollectService;
-import com.mall.xiaomi.util.ResultMessage;
+import com.mall.xiaomi.service.Imp.CollectServiceimp;
+import com.mall.xiaomi.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,8 +19,6 @@ import java.util.List;
 public class CollectController {
 
     @Autowired
-    private ResultMessage resultMessage;
-    @Autowired
     private CollectService collectService;
 
     /**
@@ -29,10 +28,9 @@ public class CollectController {
      * @return
      */
     @PostMapping("/user/{productId}/{userId}")
-    public ResultMessage addCollect(@PathVariable String userId, @PathVariable String productId) {
+    public Result addCollect(@PathVariable String userId, @PathVariable String productId) {
         collectService.addCollect(userId, productId);
-        resultMessage.success("001", "商品收藏成功");
-        return resultMessage;
+        return Result.success("收藏商品成功");
     }
 
     /**
@@ -41,16 +39,14 @@ public class CollectController {
      * @return 返回商品集合
      */
     @GetMapping("/user/{userId}")
-    public ResultMessage getCollect(@PathVariable String userId) {
+    public Result getCollect(@PathVariable String userId) {
         List<Product> collects = collectService.getCollect(userId);
-        resultMessage.success("001", collects);
-        return resultMessage;
+        return Result.success(collects);
     }
 
     @DeleteMapping("/user/{productId}/{userId}")
-    public ResultMessage deleteCollect(@PathVariable String productId, @PathVariable String userId) {
+    public Result deleteCollect(@PathVariable String productId, @PathVariable String userId) {
         collectService.deleteCollect(userId, productId);
-        resultMessage.success("001", "删除收藏成功");
-        return resultMessage;
+        return Result.success("删除收藏成功");
     }
 }

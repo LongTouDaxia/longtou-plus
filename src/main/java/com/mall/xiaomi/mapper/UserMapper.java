@@ -1,8 +1,10 @@
 package com.mall.xiaomi.mapper;
 
-import com.mall.xiaomi.pojo.User;
-import tk.mybatis.mapper.common.Mapper;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.mall.xiaomi.entity.User;
+import org.apache.ibatis.annotations.Mapper;
 
-public interface UserMapper extends Mapper<User> {
+@Mapper
+public interface UserMapper extends BaseMapper<User> {
 
 }
