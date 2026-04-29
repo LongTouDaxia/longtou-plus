@@ -2,7 +2,6 @@ package com.mall.xiaomi.controller;
 
 import com.mall.xiaomi.entity.Product;
 import com.mall.xiaomi.service.CollectService;
-import com.mall.xiaomi.service.Imp.CollectServiceimp;
 import com.mall.xiaomi.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

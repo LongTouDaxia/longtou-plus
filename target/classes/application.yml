@@ -22,6 +22,7 @@ spring:
         max-active: 8
         # 连接池最大阻塞等待时间，使用 PT 表示 Duration 格式
         max-wait: -1ms
+
 jackson:
   date-format: yyyy-MM-dd HH:mm:ss
 
@@ -31,13 +32,30 @@ rabbitmq:
   username: guest
   password: guest
 
-
-mybatis:
-  mapper-locations: classpath:mybatis/*.xml
+mybatis-plus:
+  # mapper XML 位置
+  mapper-locations: classpath*:/mapper/**/*.xml
+  # 实体扫描，多个package用逗号或分号分隔
+  type-aliases-package: com.mall.xiaomi.entity
+  global-config:
+    db-config:
+      # 主键类型
+      id-type: auto
+      # 逻辑删除配置
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
   configuration:
-    mapUnderscoreToCamelCase: true
+    # 日志输出
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # 自动驼峰命名
+    map-underscore-to-camel-case: true
 
+
+jwt:
+  secret: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4K67DMlSPXbgG0MPp0gH"
+  issuer: "longtou"
+  expiration: 7200
 #logging:
 #  level:
 #    org.apache.ibatis: DEBUG

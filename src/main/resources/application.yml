@@ -22,6 +22,7 @@ spring:
         max-active: 8
         # 连接池最大阻塞等待时间，使用 PT 表示 Duration 格式
         max-wait: -1ms
+
 jackson:
   date-format: yyyy-MM-dd HH:mm:ss
 
@@ -50,6 +51,11 @@ mybatis-plus:
     # 自动驼峰命名
     map-underscore-to-camel-case: true
 
+
+jwt:
+  secret: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4K67DMlSPXbgG0MPp0gH"
+  issuer: "longtou"
+  expiration: 7200
 #logging:
 #  level:
 #    org.apache.ibatis: DEBUG

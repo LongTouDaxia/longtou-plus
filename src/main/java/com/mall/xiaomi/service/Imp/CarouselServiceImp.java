@@ -26,7 +26,7 @@ public class CarouselServiceImp extends ServiceImpl<CarouselMapper,Carousel> imp
     public List<Carousel> getCarouselList() {
         List<Carousel> list = null;
         try {
-            list = carouselMapper.selectAll();
+            list = carouselMapper.selectList(null);
             if (ArrayUtils.isEmpty(list.toArray())) {
                 throw new XmException(ExceptionEnum.GET_CAROUSEL_NOT_FOUND);
             }

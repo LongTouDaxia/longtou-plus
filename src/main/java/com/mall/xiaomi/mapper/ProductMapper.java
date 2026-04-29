@@ -14,5 +14,5 @@ public interface ProductMapper extends BaseMapper<Product> {
         @Select("select product_id from product")
         List<Integer> selectIds();
 
-        int updateStockByIdAndVersion(@Param("productId") Integer productId, @Param("saleNum") Integer saleNum, @Param("currentVersion") int currentVersion);
+       // int updateStockByIdAndVersion(@Param("productId") Integer productId, @Param("saleNum") Integer saleNum, @Param("currentVersion") int currentVersion);
 }

@@ -27,6 +27,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -86,14 +87,17 @@ public class SeckillProductServiceImp extends ServiceImpl<SeckillProductMapper, 
                 seckillTime.setStartTime(startTime);
                 seckillTime.setEndTime(endTime);
                 // 先查看是否有该时间段
-                SeckillTime one = seckillTimeMapper.selectOne(seckillTime);
+
+                SeckillTime one = seckillTimeMapper.selectById(seckillTime.getTimeId());
+               // SeckillTime one = seckillTimeMapper.selectOne(seckillTime);
                 if (one == null) {
                         seckillTimeMapper.insert(seckillTime);
+
                         seckillProduct.setTimeId(seckillTime.getTimeId());
                 } else {
                         seckillProduct.setTimeId(one.getTimeId());
                 }
-                seckillProductMapper.insert(seckillProduct);
+                save(seckillProduct);
         }
 
         /**
@@ -105,6 +109,7 @@ public class SeckillProductServiceImp extends ServiceImpl<SeckillProductMapper, 
                 Calendar ca = Calendar.getInstance();
                 ca.set(Calendar.MINUTE, 0);
                 ca.set(Calendar.SECOND, 0);
+                //return LocalDateTime.now();
                 return ca.getTime();
         }
 

@@ -1,5 +1,6 @@
 package com.mall.xiaomi.service.Imp;
 
+import com.baomidou.mybatisplus.extension.conditions.query.QueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mall.xiaomi.exception.ExceptionEnum;
 import com.mall.xiaomi.exception.XmException;
@@ -33,14 +34,16 @@ public class CollectServiceimp extends ServiceImpl<CollectMapper,Collect> implem
         collect.setUserId(Integer.parseInt(userId));
         collect.setProductId(Integer.parseInt(productId));
         // 先看看是否数据库中已存在
-        Collect one = collectMapper.selectOne(collect);
+        Collect one = query().eq("product_id", Integer.parseInt(productId))
+                .eq("user_id", Integer.parseInt(userId))
+                .one();
         if (one != null) {
             throw new XmException(ExceptionEnum.SAVE_COLLECT_REUSE);
         }
         // 不存在，添加收藏
         collect.setCollectTime(new Date().getTime());
-        int count = collectMapper.insert(collect);
-        if (count != 1) {
+        boolean flag = save(collect);
+        if (!flag) {
             throw new XmException(ExceptionEnum.SAVE_COLLECT_ERROR);
         }
     }
@@ -64,8 +67,8 @@ public class CollectServiceimp extends ServiceImpl<CollectMapper,Collect> implem
         collect.setUserId(Integer.parseInt(userId));
         collect.setProductId(Integer.parseInt(productId));
         try {
-            int count = collectMapper.delete(collect);
-            if (count != 1) {
+            int flag = collectMapper.deleteById(collect);
+            if (flag==0) {
                 throw new XmException(ExceptionEnum.DELETE_COLLECT_ERROR);
             }
         } catch (XmException e) {

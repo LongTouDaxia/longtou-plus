@@ -1,5 +1,9 @@
 package com.mall.xiaomi.service.Imp;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.segments.MergeSegments;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mall.xiaomi.exception.ExceptionEnum;
 import com.mall.xiaomi.exception.XmException;
@@ -34,14 +38,19 @@ public class ShoppingCartServiceImp extends ServiceImpl<ShoppingCartMapper,Shopp
                 cart.setUserId(Integer.parseInt(userId));
                 List<ShoppingCart> list = null;
                 List<CartVo> cartVoList = new ArrayList<>();
-                try {
-                        list = cartMapper.select(cart);
-                        for (ShoppingCart c : list) {
+
+                // 1. 查询购物车数据
+                List<ShoppingCart> cartList = cartMapper.selectList(
+                        new LambdaQueryWrapper<ShoppingCart>()
+                                .eq(ShoppingCart::getUserId, userId)
+                );
+
+                // 2. 将 ShoppingCart 转换为 CartVo
+                if (CollectionUtils.isNotEmpty(cartList)) {
+                        for (ShoppingCart c : cartList) {
+
                                 cartVoList.add(getCartVo(c));
                         }
-                } catch (Exception e) {
-                        e.printStackTrace();
-                        throw new XmException(ExceptionEnum.GET_CART_ERROR);
                 }
                 return cartVoList;
         }
@@ -52,20 +61,23 @@ public class ShoppingCartServiceImp extends ServiceImpl<ShoppingCartMapper,Shopp
                 cart.setUserId(Integer.parseInt(userId));
                 cart.setProductId(Integer.parseInt(productId));
                 // 查看数据库是否已存在,存在数量直接加1
-                ShoppingCart one = cartMapper.selectOne(cart);
+                ShoppingCart shoppingCart = query().eq("productId", productId)
+                        .eq("userId", userId)
+                        .one();
+             //   ShoppingCart one = cartMapper.selectOne(cart);
 
-                if (one != null) {
+                if (shoppingCart != null) {
 
                         // 还要判断是否达到该商品规定上限
-                        if (one.getNum() >= 5) { // TODO 这里默认设为5 后期再动态修改
+                        if (shoppingCart.getNum() >= 5) { // TODO 这里默认设为5 后期再动态修改
                                 throw new XmException(ExceptionEnum.ADD_CART_NUM_UPPER);
                         }
-                        Integer version = one.getVersion();
+                        Integer version = shoppingCart.getVersion();
                         // 尝试更新数量并增加版本号
-                        one.setNum(one.getNum() + 1);
+                        shoppingCart.setNum(shoppingCart.getNum() + 1);
 
                         // 使用带有版本号判断的条件更新
-                        int updateCount = cartMapper.updateCartByIdAndVersion(one);
+                        int updateCount = cartMapper.updateCartByIdAndVersion(shoppingCart);
 
                         if (updateCount == 0) {
                                 CartVo cartVo = new CartVo();
@@ -93,7 +105,7 @@ public class ShoppingCartServiceImp extends ServiceImpl<ShoppingCartMapper,Shopp
          */
         private CartVo getCartVo(ShoppingCart cart) {
                 // 获取商品，用于封装下面的类
-                Product product = productMapper.selectByPrimaryKey(cart.getProductId());
+                Product product = productMapper.selectById(cart.getProductId());
                 // 返回购物车详情
                 CartVo cartVo = new CartVo();
                 cartVo.setId(cart.getId());
@@ -113,8 +125,9 @@ public class ShoppingCartServiceImp extends ServiceImpl<ShoppingCartMapper,Shopp
                 cart.setUserId(Integer.parseInt(userId));
                 cart.setNum(Integer.parseInt(num));
                 try {
-                        int count = cartMapper.updateByPrimaryKeySelective(cart);
-                        if (count != 1) {
+                        //增加数量
+                        boolean flag = save(cart);
+                        if (flag) {
                                 throw new XmException(ExceptionEnum.UPDATE_CART_ERROR);
                         }
                 } catch (Exception e) {
@@ -128,7 +141,7 @@ public class ShoppingCartServiceImp extends ServiceImpl<ShoppingCartMapper,Shopp
                 cart.setId(Integer.parseInt(cartId));
                 cart.setUserId(Integer.parseInt(userId));
                 try {
-                        cartMapper.delete(cart);
+                        cartMapper.deleteById(cart);
                 } catch (XmException e) {
                         e.printStackTrace();
                         throw new XmException(ExceptionEnum.DELETE_CART_ERROR);

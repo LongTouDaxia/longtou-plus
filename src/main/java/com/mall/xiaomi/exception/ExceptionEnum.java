@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public enum ExceptionEnum {
 
+    TOKEN_EXPIRE(404,"token无效，请重新登录"),
     GET_CAROUSEL_ERROR(002, "轮播图查询失败"),
     GET_CAROUSEL_NOT_FOUND(002, "轮播图为空"),
 

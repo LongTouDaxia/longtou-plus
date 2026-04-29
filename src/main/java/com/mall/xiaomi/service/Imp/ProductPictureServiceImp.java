@@ -1,5 +1,7 @@
 package com.mall.xiaomi.service.Imp;
 
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.baomidou.mybatisplus.extension.conditions.query.QueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mall.xiaomi.exception.ExceptionEnum;
 import com.mall.xiaomi.exception.XmException;
@@ -24,18 +26,14 @@ public class ProductPictureServiceImp extends ServiceImpl<ProductPictureMapper,P
     private ProductPictureMapper productPictureMapper;
 
     public List<ProductPicture> getProductPictureByProductId(String productId) {
-        ProductPicture picture = new ProductPicture();
-        picture.setProductId(Integer.parseInt(productId));
-        List<ProductPicture> list = null;
-        try {
-            list = productPictureMapper.select(picture);
-            if (ArrayUtils.isEmpty(list.toArray())) {
-                throw new XmException(ExceptionEnum.GET_PRODUCT_PICTURE_NOT_FOUND);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new XmException(ExceptionEnum.GET_PRODUCT_PICTURE_ERROR);
+
+        List<ProductPicture> productPictureList = query()
+                .eq("product_id", productId)
+                .list();
+      //  List<ProductPicture> productPictureList = (List<ProductPicture>) productPictureMapper.selectById(Integer.parseInt(productId));
+        if(CollectionUtils.isEmpty(productPictureList)){
+            throw new XmException(ExceptionEnum.GET_CAROUSEL_NOT_FOUND);
         }
-        return list;
+        return productPictureList;
     }
 }

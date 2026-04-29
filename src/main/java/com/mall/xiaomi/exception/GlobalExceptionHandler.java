@@ -1,11 +1,9 @@
 package com.mall.xiaomi.exception;
 
 import com.mall.xiaomi.util.Result;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-
+import org.springframework.web.bind.annotation.ExceptionHandler;
 /**
  * @Auther: wdd
  * @Date: 2020-03-19 16:45
@@ -13,15 +11,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @ControllerAdvice
 @ResponseBody
-public class XmExceptionHandler {
+public class GlobalExceptionHandler {
 
-    @Autowired
-    private Result result;
 
-    @ExceptionHandler(XmException.class)
+
+    @ExceptionHandler(Exception.class)
     public Result handleException(XmException e){
         ExceptionEnum em = e.getExceptionEnum();
-        result.fail(em.getCode() + "", em.getMsg());
-        return result;
+        return Result.error(em.getCode() + "", em.getMsg());
     }
 }

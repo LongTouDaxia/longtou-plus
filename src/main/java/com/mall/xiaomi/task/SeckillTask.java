@@ -5,10 +5,12 @@ import com.mall.xiaomi.mapper.SeckillProductMapper;
 import com.mall.xiaomi.mapper.SeckillTimeMapper;
 import com.mall.xiaomi.entity.SeckillProduct;
 import com.mall.xiaomi.entity.SeckillTime;
+import com.mall.xiaomi.service.SeckillProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.*;
 
 /**
@@ -19,6 +21,8 @@ import java.util.*;
 @Component
 public class SeckillTask {
 
+    @Resource
+    private SeckillProductService seckillProductService;
     @Autowired
     private SeckillTimeMapper seckillTimeMapper;
     @Autowired
@@ -67,7 +71,8 @@ public class SeckillTask {
             }
 
 
-            seckillProductMapper.insertList(seckillProducts);
+            seckillProductService.saveBatch(seckillProducts);
+            //seckillProductMapper.insertList(seckillProducts);
             // System.out.println(Arrays.toString(seckillProducts.toArray()));
 
             try {

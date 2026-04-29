@@ -1,5 +1,6 @@
 package com.mall.xiaomi.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.pagehelper.PageInfo;
 import com.mall.xiaomi.entity.Product;
 import com.mall.xiaomi.service.Imp.ProductServiceImp;
@@ -47,11 +48,12 @@ public class ProductController {
 
     @GetMapping("/page/{currentPage}/{pageSize}/{categoryId}")
     public Result getProductByPage(@PathVariable String currentPage, @PathVariable String pageSize, @PathVariable String categoryId) {
-        PageInfo<Product> pageInfo = productService.getProductByPage(currentPage, pageSize, categoryId);
+        Page<Product> page = productService.getProductByPage(currentPage, pageSize, categoryId);
         HashMap<String, Object> map = new HashMap<>();
         map.put("code", "001");
-        map.put("data", pageInfo.getList());
-        map.put("total", pageInfo.getTotal());
+
+        map.put("data", page.getRecords());
+        map.put("total", page.getTotal());
         return Result.success(map);
     }
 

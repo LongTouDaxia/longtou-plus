@@ -1,5 +1,6 @@
 package com.mall.xiaomi.service.Imp;
 
+import com.baomidou.mybatisplus.extension.conditions.query.QueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mall.xiaomi.exception.ExceptionEnum;
 import com.mall.xiaomi.exception.XmException;
@@ -23,9 +24,9 @@ public class CategoryServiceImp extends ServiceImpl<CategoryMapper,Category> imp
     private CategoryMapper categoryMapper;
 
     public List<Category> getAll() {
-        List<Category> categories = null;
+        List<Category> categories;
         try {
-            categories = categoryMapper.selectAll();
+            categories = query().list();
             if (categories == null) {
                 throw new XmException(ExceptionEnum.GET_CATEGORY_NOT_FOUND);
             }

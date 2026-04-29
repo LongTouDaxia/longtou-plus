@@ -47,7 +47,7 @@ public class OrderServiceImp extends ServiceImpl<OrderMapper,Order> implements O
 
         private final static String SECKILL_PRODUCT_USER_LIST = "seckill:product:user:list";
 
-        @Transactional
+       @Transactional
         public void addOrder(List<CartVo> cartVoList, Integer userId) {
                 // 先添加订单
                 String orderId = idWorker.nextId() + ""; // 订单id
@@ -71,12 +71,11 @@ public class OrderServiceImp extends ServiceImpl<OrderMapper,Order> implements O
                         // 减去商品库存,记录卖出商品数量
                         // TODO : 此处会产生多线程问题，即不同用户同时对这个商品操作，此时会导致数量不一致问题,
 
-       /*      Product product = productMapper.selectByPrimaryKey(cartVo.getProductId());
-            product.setProductNum(product.getProductNum() - cartVo.getNum());
-            product.setProductSales(product.getProductSales() + cartVo.getNum()); */
+
                         //所以利用数据库原子性+乐观锁+重试机制 通过产品数量>0 ,版本号是否相等 来进行判断, 保证库存不会出现负数
                         // 获取当前商品信息
-                        Product product = productMapper.selectByPrimaryKey(productId);
+                        Product product = productMapper.selectById(productId);
+                        //Product product = productMapper.selectByPrimaryKey(productId);
                         if (product == null) {
                                 throw new RuntimeException("商品不存在");
                         }
@@ -88,13 +87,16 @@ public class OrderServiceImp extends ServiceImpl<OrderMapper,Order> implements O
                         boolean success = false;
 
                         while (retryTimes > 0 && !success) {
-                                int updateCount = productMapper.updateStockByIdAndVersion(productId, saleNum, currentVersion);
+                                int updateCount = productMapper.update(product, null);
+                             //   int updateCount = productMapper.updateStockByIdAndVersion(productId, saleNum, currentVersion);
                                 if (updateCount > 0) {
                                         success = true;
                                 } else {
                                         retryTimes--;
                                         // 重新获取最新的 product 信息
-                                        product = productMapper.selectByPrimaryKey(productId);
+                                        product = productMapper.selectById(productId);
+
+                                        //product = productMapper.selectByPrimaryKey(productId);
                                         currentVersion = product.getVersion();
                                 }
                         }
@@ -103,8 +105,9 @@ public class OrderServiceImp extends ServiceImpl<OrderMapper,Order> implements O
                 ShoppingCart cart = new ShoppingCart();
                 cart.setUserId(userId);
                 try {
-                        int count = cartMapper.delete(cart);
-                        if (count == 0) {
+                        int flag = cartMapper.deleteById(cart.getId());
+                        //int count = cartMapper.delete(cart);
+                        if (flag == 0) {
                                 throw new XmException(ExceptionEnum.ADD_ORDER_ERROR);
                         }
                 } catch (Exception e) {
@@ -148,12 +151,23 @@ public class OrderServiceImp extends ServiceImpl<OrderMapper,Order> implements O
 
         @Transactional
         public void addSeckillOrder(String seckillId, String userId) {
+
+                Long count = query()
+                        .eq("seckillId", seckillId)
+                        .eq("userId", userId)
+                        .count();
+
+                if(count>0){
+                        //已经购买过一次
+                        throw new XmException(ExceptionEnum.GET_SECKILL_IS_REUSE);
+                }
                 // 订单id
                 String orderId = idWorker.nextId() + "";
                 // 商品id
                 SeckillProduct seckillProduct = new SeckillProduct();
                 seckillProduct.setSeckillId(Integer.parseInt(seckillId));
-                SeckillProduct one = seckillProductMapper.selectOne(seckillProduct);
+                SeckillProduct one = seckillProductMapper.selectById(seckillProduct.getSeckillId());
+        //        SeckillProduct one = seckillProductMapper.selectOne(seckillProduct);
                 Integer productId = one.getProductId();
                 // 秒杀价格
                 Double price = one.getSeckillPrice();
@@ -168,16 +182,22 @@ public class OrderServiceImp extends ServiceImpl<OrderMapper,Order> implements O
                 order.setProductPrice(price);
 
                 try {
-                        orderMapper.insert(order);
+                        save(order);
+                       // orderMapper.insert(order);
                         // 减库存
-                        seckillProductMapper.decrStock(one.getSeckillId());
+                        update()
+                                .setSql("seckill_stock = seckill_stock -1")
+                                        .eq("seckill_id", seckillId)
+                                                .gt("seckill_stock",0)
+                                                        .update();
+                      //  seckillProductMapper.decrStock(one.getSeckillId());
                 } catch (Exception e) {
                         e.printStackTrace();
                         throw new XmException(ExceptionEnum.ADD_ORDER_ERROR);
                 }
 
                 // 订单创建成功, 将用户写入redis, 防止多次抢购
-                redisTemplate.opsForList().leftPush(SECKILL_PRODUCT_USER_LIST + seckillId, userId);
+               // redisTemplate.opsForList().leftPush(SECKILL_PRODUCT_USER_LIST + seckillId, userId);
 
         }
 }

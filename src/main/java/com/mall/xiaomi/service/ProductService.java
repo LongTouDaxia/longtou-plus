@@ -1,7 +1,7 @@
 package com.mall.xiaomi.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.github.pagehelper.PageInfo;
 import com.mall.xiaomi.entity.Product;
 import org.springframework.stereotype.Service;
 
@@ -15,5 +15,5 @@ public interface ProductService extends IService<Product> {
 
     Product getProductById(String productId);
 
-    PageInfo<Product> getProductByPage(String currentPage, String pageSize, String categoryId);
+    Page<Product> getProductByPage(String currentPage, String pageSize, String categoryId);
 }
