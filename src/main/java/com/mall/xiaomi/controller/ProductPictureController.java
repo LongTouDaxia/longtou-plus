@@ -27,8 +27,7 @@ public class ProductPictureController {
 
     @GetMapping("/product/{productId}")
     public Result productPicture(@PathVariable String productId) {
-        List<ProductPicture> products = productPictureService.getProductPictureByProductId(productId);
-        return Result.success(products);
+        return productPictureService.getProductPictureByProductId(productId);
     }
 
 }

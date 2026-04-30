@@ -26,8 +26,8 @@ public class CategoryController {
 
     @GetMapping("")
     public Result category() {
-        List<Category> categories = categoryService.getAll();
-        return Result.success(categories);
+
+        return categoryService.getAll();
     }
 
 }

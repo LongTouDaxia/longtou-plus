@@ -1,12 +1,10 @@
 package com.mall.xiaomi.service.Imp;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.segments.MergeSegments;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.mall.xiaomi.exception.ExceptionEnum;
-import com.mall.xiaomi.exception.XmException;
+import com.mall.xiaomi.common.ExceptionEnum;
+import com.mall.xiaomi.common.XmException;
 import com.mall.xiaomi.mapper.ProductMapper;
 import com.mall.xiaomi.mapper.ShoppingCartMapper;
 import com.mall.xiaomi.entity.Product;
@@ -70,7 +68,7 @@ public class ShoppingCartServiceImp extends ServiceImpl<ShoppingCartMapper,Shopp
 
                         // 还要判断是否达到该商品规定上限
                         if (shoppingCart.getNum() >= 5) { // TODO 这里默认设为5 后期再动态修改
-                                throw new XmException(ExceptionEnum.ADD_CART_NUM_UPPER);
+                                throw new XmException(ExceptionEnum.CATEGORY_PRODUCT_NULL);
                         }
                         Integer version = shoppingCart.getVersion();
                         // 尝试更新数量并增加版本号
@@ -128,11 +126,11 @@ public class ShoppingCartServiceImp extends ServiceImpl<ShoppingCartMapper,Shopp
                         //增加数量
                         boolean flag = save(cart);
                         if (flag) {
-                                throw new XmException(ExceptionEnum.UPDATE_CART_ERROR);
+                                throw new XmException(ExceptionEnum.ORDER_CREATE_EXCEPTION);
                         }
                 } catch (Exception e) {
                         e.printStackTrace();
-                        throw new XmException(ExceptionEnum.UPDATE_CART_ERROR);
+                        throw new XmException(ExceptionEnum.ORDER_CREATE_EXCEPTION);
                 }
         }
 
@@ -144,7 +142,7 @@ public class ShoppingCartServiceImp extends ServiceImpl<ShoppingCartMapper,Shopp
                         cartMapper.deleteById(cart);
                 } catch (XmException e) {
                         e.printStackTrace();
-                        throw new XmException(ExceptionEnum.DELETE_CART_ERROR);
+                        throw new XmException(ExceptionEnum.GET_CAROUSEL_NOT_FOUND);
                 }
         }
 }

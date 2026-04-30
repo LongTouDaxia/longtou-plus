@@ -1,12 +1,12 @@
 package com.mall.xiaomi.service.Imp;
 
-import com.baomidou.mybatisplus.extension.conditions.query.QueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.mall.xiaomi.exception.ExceptionEnum;
-import com.mall.xiaomi.exception.XmException;
+import com.mall.xiaomi.common.ExceptionEnum;
+import com.mall.xiaomi.common.XmException;
 import com.mall.xiaomi.mapper.CategoryMapper;
 import com.mall.xiaomi.entity.Category;
 import com.mall.xiaomi.service.CategoryService;
+import com.mall.xiaomi.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,17 +23,12 @@ public class CategoryServiceImp extends ServiceImpl<CategoryMapper,Category> imp
     @Autowired
     private CategoryMapper categoryMapper;
 
-    public List<Category> getAll() {
-        List<Category> categories;
-        try {
-            categories = query().list();
-            if (categories == null) {
-                throw new XmException(ExceptionEnum.GET_CATEGORY_NOT_FOUND);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new XmException(ExceptionEnum.GET_CATEGORY_ERROR);
+    public Result getAll() {
+        List<Category> categories = categoryMapper.selectList(null);
+        if(categories == null){
+            return Result.error(ExceptionEnum.CATEGORY_NOT_FIND.getMessage());
         }
-        return categories;
+        return Result.success(categories);
+
     }
 }

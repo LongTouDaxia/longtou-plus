@@ -26,19 +26,16 @@ public class OrderController {
     private OrderService orderService;
 
     @PostMapping("")
-    public Result addOrder(@RequestBody List<CartVo> cartVoList, @CookieValue("XM_TOKEN") String cookie) {
-        // 先判断cookie是否存在，和redis校验
-        Integer userId = (Integer) redisTemplate.opsForHash().get(cookie, "userId");
-        orderService.addOrder(cartVoList, userId);
-        return Result.success("下单成功");
+    public Result addOrder(@RequestBody List<CartVo> cartVoList) {
+
+
+        return orderService.addOrder(cartVoList);
     }
 
     @GetMapping("")
-    public Result getOrder(@CookieValue("XM_TOKEN") String cookie) {
-        // 先判断cookie是否存在，和redis校验
-        Integer userId = (Integer) redisTemplate.opsForHash().get(cookie, "userId");
-        List<List<OrderVo>> orders = orderService.getOrder(userId);
-        return Result.success(orders);
+    public Result getOrder() {
+
+        return orderService.getOrder();
     }
 
 }

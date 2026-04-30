@@ -2,8 +2,8 @@ package com.mall.xiaomi.service.Imp;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mall.xiaomi.dto.UserDTO;
-import com.mall.xiaomi.exception.ExceptionEnum;
-import com.mall.xiaomi.exception.XmException;
+import com.mall.xiaomi.common.ExceptionEnum;
+import com.mall.xiaomi.common.XmException;
 import com.mall.xiaomi.mapper.UserMapper;
 import com.mall.xiaomi.entity.User;
 import com.mall.xiaomi.service.UserService;
@@ -35,7 +35,7 @@ public class UserServiceImp extends ServiceImpl<UserMapper,User> implements User
                 .one();
 
         if(user==null){
-            throw new XmException(ExceptionEnum.GET_USER_NOT_FOUND);
+            throw new XmException(ExceptionEnum.USER_NOT_FOUND);
         }
 
         //生成并返回token令牌
@@ -54,7 +54,7 @@ public class UserServiceImp extends ServiceImpl<UserMapper,User> implements User
 
         if (count > 0) {
             // 用户名已存在
-            throw new XmException(ExceptionEnum.SAVE_USER_REUSE);
+            throw new XmException(ExceptionEnum.USER_NOT_FOUND);
         }
         // 使用md5对密码进行加密
         user.setPassword(MD5Util.MD5Encode(user.getPassword() + "", "UTF-8"));

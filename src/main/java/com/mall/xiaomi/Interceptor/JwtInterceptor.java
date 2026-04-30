@@ -1,9 +1,6 @@
 package com.mall.xiaomi.Interceptor;
 
-import com.mall.xiaomi.exception.ExceptionEnum;
-import com.mall.xiaomi.exception.XmException;
 import com.mall.xiaomi.util.JwtUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;

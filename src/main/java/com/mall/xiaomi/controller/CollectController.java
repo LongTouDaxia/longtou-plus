@@ -28,8 +28,8 @@ public class CollectController {
      */
     @PostMapping("/user/{productId}/{userId}")
     public Result addCollect(@PathVariable String userId, @PathVariable String productId) {
-        collectService.addCollect(userId, productId);
-        return Result.success("收藏商品成功");
+
+        return collectService.addCollect(userId, productId);
     }
 
     /**
@@ -39,13 +39,13 @@ public class CollectController {
      */
     @GetMapping("/user/{userId}")
     public Result getCollect(@PathVariable String userId) {
-        List<Product> collects = collectService.getCollect(userId);
-        return Result.success(collects);
+
+        return collectService.getCollect(userId);
     }
 
     @DeleteMapping("/user/{productId}/{userId}")
     public Result deleteCollect(@PathVariable String productId, @PathVariable String userId) {
-        collectService.deleteCollect(userId, productId);
-        return Result.success("删除收藏成功");
+
+        return collectService.deleteCollect(userId, productId);
     }
 }

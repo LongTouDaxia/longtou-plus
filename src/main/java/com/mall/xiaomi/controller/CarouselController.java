@@ -24,8 +24,8 @@ public class CarouselController {
 
     @GetMapping("/resources/carousel")
     public Result carousels() {
-        List<Carousel> carousels = carouselService.getCarouselList();
-        return Result.success(carousels);
+
+        return carouselService.getCarouselList();
     }
 
 }

@@ -1,4 +1,4 @@
-package com.mall.xiaomi.exception;
+package com.mall.xiaomi.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -2,17 +2,16 @@ package com.mall.xiaomi.service.Imp;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mall.xiaomi.entity.Product;
-import com.mall.xiaomi.exception.ExceptionEnum;
-import com.mall.xiaomi.exception.XmException;
+import com.mall.xiaomi.common.ExceptionEnum;
+import com.mall.xiaomi.common.XmException;
 import com.mall.xiaomi.mapper.SeckillProductMapper;
 import com.mall.xiaomi.mapper.SeckillTimeMapper;
 import com.mall.xiaomi.entity.SeckillProduct;
 import com.mall.xiaomi.entity.SeckillTime;
-import com.mall.xiaomi.service.ProductService;
 import com.mall.xiaomi.service.SeckillProductService;
 import com.mall.xiaomi.util.BeanUtil;
 import com.mall.xiaomi.util.RedisKey;
+import com.mall.xiaomi.util.Result;
 import com.mall.xiaomi.vo.SeckillProductVo;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.amqp.AmqpException;
@@ -27,7 +26,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -56,13 +54,13 @@ public class SeckillProductServiceImp extends ServiceImpl<SeckillProductMapper, 
         private HashMap<String, Boolean> localOverMap = new HashMap<>();
 
         @Transactional
-        public List<SeckillProductVo> getProduct(String timeId) {
+        public Result getProduct(String timeId) {
 
                 // 先查看缓存，是否有列表
                 List<SeckillProductVo> seckillProductVos = redisTemplate.opsForList().range(RedisKey.SECKILL_PRODUCT_LIST + timeId, 0, -1);
 
                 if (ArrayUtils.isNotEmpty(seckillProductVos.toArray())) {
-                        return seckillProductVos;
+                        return Result.success(seckillProductVos);
                 }
                 // 缓存没有，再从数据库中获取，添加到缓存
                 seckillProductVos = seckillProductMapper.getSeckillProductVos(timeId, new Date().getTime());
@@ -73,9 +71,9 @@ public class SeckillProductServiceImp extends ServiceImpl<SeckillProductMapper, 
                         redisTemplate.expire(RedisKey.SECKILL_PRODUCT_LIST + timeId, l, TimeUnit.MILLISECONDS);
                 } else {
                         // 秒杀商品过期或不存在
-                        throw new XmException(ExceptionEnum.GET_SECKILL_NOT_FOUND);
+                      return Result.error(ExceptionEnum.SECKILL_PRODUCT_NULL.getMessage());
                 }
-                return seckillProductVos;
+                return Result.success(seckillProductVos);
         }
 
         public void addSeckillProduct(SeckillProduct seckillProduct) {
@@ -178,7 +176,7 @@ public class SeckillProductServiceImp extends ServiceImpl<SeckillProductMapper, 
                         Long startTime = seckillProductVo.getStartTime();
 
                         if (startTime > new Date().getTime()) {
-                                throw new XmException(ExceptionEnum.GET_SECKILL_IS_NOT_START);
+                                throw new XmException(ExceptionEnum.SECKILL_NOT_START);
                         }
                 }
 
@@ -193,7 +191,7 @@ public class SeckillProductServiceImp extends ServiceImpl<SeckillProductMapper, 
 
                 if (result == -1) {
                         // 秒杀完成，库存为空
-                        throw new XmException(ExceptionEnum.GET_SECKILL_IS_OVER);
+                        throw new XmException(ExceptionEnum.CATEGORY_PRODUCT_NULL);
                 }
 
 /*         // 判断是否已经秒杀到了，避免一个账户秒杀多个商品

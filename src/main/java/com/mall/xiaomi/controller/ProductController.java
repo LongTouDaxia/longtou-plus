@@ -28,22 +28,22 @@ public class ProductController {
 
     @GetMapping("/category/limit/{categoryId}")
     public Result getProductByCategoryId(@PathVariable Integer categoryId) {
-        List<Product> list = productService.getProductByCategoryId(categoryId);
-        return Result.success(list);
+
+        return productService.getProductByCategoryId(categoryId);
 
     }
 
     @GetMapping("/category/hot")
     public Result getHotProduct() {
-        List<Product> list = productService.getHotProduct();
-        return Result.success(list);
+
+        return productService.getHotProduct();
 
     }
 
     @GetMapping("/{productId}")
     public Result getProduct(@PathVariable String productId) {
-        Product product = productService.getProductById(productId);
-        return Result.success(product);
+
+        return productService.getProductById(productId);
     }
 
     @GetMapping("/page/{currentPage}/{pageSize}/{categoryId}")

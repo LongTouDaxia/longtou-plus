@@ -1,4 +1,4 @@
-package com.mall.xiaomi.exception;
+package com.mall.xiaomi.common;
 
 import com.mall.xiaomi.util.Result;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -15,9 +15,9 @@ public class GlobalExceptionHandler {
 
 
 
-    @ExceptionHandler(XmException.class)
+   /* @ExceptionHandler(XmException.class)
     public Result handleException(XmException e){
         ExceptionEnum em = e.getExceptionEnum();
         return Result.error(em.getCode() + "", em.getMsg());
-    }
+    }*/
 }

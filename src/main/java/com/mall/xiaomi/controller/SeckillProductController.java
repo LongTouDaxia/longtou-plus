@@ -34,8 +34,8 @@ public class SeckillProductController {
      */
     @GetMapping("/time/{timeId}")
     public Result getProduct(@PathVariable String timeId) {
-        List<SeckillProductVo> seckillProductVos = seckillProductService.getProduct(timeId);
-        return Result.success(seckillProductVos);
+
+        return seckillProductService.getProduct(timeId);
     }
 
     /**
