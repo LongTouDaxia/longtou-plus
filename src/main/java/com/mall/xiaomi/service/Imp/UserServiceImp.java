@@ -11,6 +11,7 @@ import com.mall.xiaomi.util.JwtUtil;
 import com.mall.xiaomi.util.MD5Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 /**
  * @Auther: wdd
@@ -27,7 +28,7 @@ public class UserServiceImp extends ServiceImpl<UserMapper,User> implements User
 
 
     @Override
-    public String login(UserDTO userDTO) {
+    public String login(@RequestBody UserDTO userDTO) {
         //数据库查询用户信息
         User user = query().eq("username", userDTO.getUserName())
                 .eq("password", MD5Util.MD5Encode(userDTO.getPassword(), "UTF-8"))

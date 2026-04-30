@@ -53,7 +53,7 @@ mybatis-plus:
 
 
 jwt:
-  secret: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4K67DMlSPXbgG0MPp0gH"
+  secret: "MTE1NjA1THV1L2J1aWxkX3JlbGF0ZWQvSmF2YV9ob3VkdWFuL2phdmFfcHJvamVjdC9sb25ndG91LXBsdXM="
   issuer: "longtou"
   expiration: 7200
 #logging:

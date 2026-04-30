@@ -15,7 +15,7 @@ public class GlobalExceptionHandler {
 
 
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(XmException.class)
     public Result handleException(XmException e){
         ExceptionEnum em = e.getExceptionEnum();
         return Result.error(em.getCode() + "", em.getMsg());

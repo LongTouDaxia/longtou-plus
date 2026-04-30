@@ -12,7 +12,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
+@Component
 public class JwtInterceptor implements HandlerInterceptor {
 
 
@@ -27,7 +27,8 @@ public class JwtInterceptor implements HandlerInterceptor {
         String token = request.getHeader("Authorization");
         if(token == null || !jwtUtil.validateToken(token)){
             //
-            throw new XmException(ExceptionEnum.TOKEN_EXPIRE);
+
+            return false;
 
         }
         return true;
