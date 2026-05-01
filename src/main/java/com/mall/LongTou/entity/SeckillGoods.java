@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("seckill_good")
+@TableName("seckill_goods")
 public class SeckillGoods {
     private Integer seckillGoodsId;
     private Integer activityId;

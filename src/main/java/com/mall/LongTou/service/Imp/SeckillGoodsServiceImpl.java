@@ -1,9 +1,11 @@
 package com.mall.LongTou.service.Imp;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mall.LongTou.common.BusinessException;
 import com.mall.LongTou.common.ExceptionEnum;
+import com.mall.LongTou.common.UserHolder;
 import com.mall.LongTou.entity.Orders;
 import com.mall.LongTou.entity.Product;
 import com.mall.LongTou.entity.SeckillActivity;
@@ -19,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,6 +41,8 @@ public class SeckillGoodsServiceImpl extends ServiceImpl<SeckillGoodsMapper, Sec
     @Autowired
     private SeckillGoodsMapper seckillGoodsMapper;
 
+    @Autowired
+    private UserHolder userHolder;
 
     @Override
     public boolean decreaseStock(Integer seckillGoodsId, Integer quantity, Integer version) {
@@ -82,84 +87,88 @@ public class SeckillGoodsServiceImpl extends ServiceImpl<SeckillGoodsMapper, Sec
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void createSeckillOrder(Integer userId, Integer seckillGoodsId, Integer quantity) {
-        // 1. 参数校验
-        if (userId == null || seckillGoodsId == null || quantity == null || quantity <= 0) {
-            throw new BusinessException(ExceptionEnum.PARAM_ERROR, "参数不合法");
-        }
+    public String createSeckillOrder(@NotNull Integer userId, Integer seckillGoodsId, Integer quantity) {
+        //参数校验？校验过了吧
+        //查开始秒杀活动开始时间
+        SeckillGoods seckillGoods = query().eq("seckill_goods_id", seckillGoodsId).one();
 
-        // 2. 查询秒杀商品（加行锁，悲观锁方式，可选；这里使用乐观锁，先查再更新）
-        SeckillGoods seckillGoods = seckillGoodsMapper.selectById(seckillGoodsId);
+        //这个方法报错  不知道为啥
+        //   SeckillGoods seckillGoods = seckillGoodsMapper.selectById(seckillGoodsId);
         if (seckillGoods == null) {
             throw new BusinessException(ExceptionEnum.SECKILL_GOODS_NOT_EXIST);
         }
 
-        // 3. 校验活动时间
-        SeckillActivity activity = seckillActivityMapper.selectById(seckillGoods.getActivityId());
-        if (activity == null || activity.getStatus() != 1) {
-            throw new BusinessException(ExceptionEnum.SECKILL_ACTIVITY_NOT_EXIST);
-        }
-
-        //判断活动是否开始
+        SeckillActivity seckillActivity = seckillActivityMapper.selectById(seckillGoods.getActivityId());
+        // 获取当前时间
         LocalDateTime now = LocalDateTime.now();
-
-        if (now.isBefore(activity.getStartTime())) {
-            throw new BusinessException(ExceptionEnum.SECKILL_NOT_START);
+        if (now.isBefore(seckillActivity.getStartTime())) {
+            throw new BusinessException(ExceptionEnum.SECKILL_ACTIVITY_NOT_START);
         }
-        if (now.isAfter( activity.getEndTime())) {
+
+        if (now.isAfter(seckillActivity.getEndTime())) {
             throw new BusinessException(ExceptionEnum.SECKILL_ALREADY_ENDED);
+
         }
 
-        // 4. 限购校验
-        if (quantity > seckillGoods.getLimitPerUser()) {
-            throw new BusinessException(ExceptionEnum.USER_HAS_SECOND_KILL_LIMIT);
-        }
+        //活动开始  检验库存
+        Integer stock = seckillGoods.getSeckillStock();
+        //获取版本号
+        Integer version = seckillGoods.getVersion();
+        //库存不足
+        if (stock <= 0) {
+            throw new BusinessException(ExceptionEnum.SECKILL_STOCK_INSUFFICIENT);
 
-        // 5. 防止重复下单: 检查是否已有成功订单（同一用户同一秒杀商品）
-        LambdaQueryWrapper<Orders> orderWrapper = new LambdaQueryWrapper<>();
-        orderWrapper.eq(Orders::getUserId, userId)
-                .eq(Orders::getSeckillGoodsId, seckillGoodsId)
-                .ne(Orders::getOrderStatus, 2); // 排除已取消的订单（可根据需求，已取消的可以再买？一般不允许）
-        Long existed = ordersMapper.selectCount(orderWrapper);
-        if (existed > 0) {
+
+        }
+        //查询用户是否下单 一人一单子
+        Orders order = ordersMapper.selectOne(Wrappers.<Orders>lambdaQuery()
+                .eq(Orders::getUserId, userId)
+                .eq(Orders::getSeckillGoodsId, seckillGoods.getSeckillGoodsId()));
+
+        if(order != null){
             throw new BusinessException(ExceptionEnum.USER_REPEAT_SECOND_KILL);
         }
+        try {
 
-        // 6. 乐观锁扣减库存
-        int version = seckillGoods.getVersion();
-         /*       int updated = seckillGoodsMapper.decreaseStock(seckillGoodsId, quantity, version);//mysql实现
-                if (updated == 0) {
-                        throw new BusinessException(ExceptionEnum.SECKILL_STOCK_INSUFFICIENT);
-                }
+            //乐观锁版本号删减库存
+            boolean updated = update().eq("seckill_goods_id", seckillGoodsId)
+                    .eq("version", version)
+                    .setSql("seckill_stock = seckill_stock -1 ")
+                    .setSql("version = version + 1 ")
+                    .gt("seckill_stock", 0).update();
 
-          */
+            if (!updated) {
+                // 可能是库存不足或版本号冲突
+                throw new BusinessException(ExceptionEnum.SECKILL_STOCK_INSUFFICIENT);
+            }
+            //生成订单
+            Product product = productMapper.selectById(seckillGoods.getProductId());
+            Orders orders = new Orders();
+            //设置订单相关id
+            orders.setOrderId(generateOrderId(userId));
+            orders.setSeckillGoodsId(seckillGoodsId);
+            orders.setProductId(product.getProductId());
+            orders.setUserId(userId);
 
-        // 7. 获取商品信息（快照）
-        Product product = productMapper.selectById(seckillGoods.getProductId());
-        if (product == null) {
-            throw new BusinessException(ExceptionEnum.PRODUCT_NOT_FOUND);
+
+            orders.setOrderTime(LocalDateTime.now());
+            //未支付
+            orders.setOrderStatus(0);
+
+            orders.setProductNameSnapshot(product.getProductName());
+            orders.setSeckillPriceSnapshot(product.getProductPrice());
+            orders.setProductPrice(product.getProductPrice());
+            orders.setProductNum(1);
+            ordersMapper.insert(orders);
+            return orders.getOrderId();
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+             throw new BusinessException(ExceptionEnum.ADD_ORDER_ERROR);
         }
 
-        // 8. 生成订单号（简单示例，实际使用雪花算法）
-        String orderId = generateOrderId(userId);
 
-        // 9. 创建订单实体
-        Orders order = new Orders();
-        order.setOrderId(orderId);
-        order.setUserId(userId);
-        order.setProductId(product.getProductId());
-        order.setProductNum(quantity);
-        order.setProductPrice(product.getProductPrice());          // 原价快照
-        order.setOrderTime(now);
-        order.setOrderStatus(0);                                   // 待支付
-        order.setSeckillGoodsId(seckillGoodsId);
-        order.setSeckillPriceSnapshot(seckillGoods.getSeckillPrice().doubleValue());
-        order.setProductNameSnapshot(product.getProductName());
-
-        int insert = ordersMapper.insert(order);
-        if (insert != 1) {
-            throw new BusinessException(ExceptionEnum.ADD_ORDER_ERROR);
-        }
     }
 
     private String generateOrderId(Integer userId) {

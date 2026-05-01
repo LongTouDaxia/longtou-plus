@@ -3,7 +3,9 @@ package com.mall.LongTou.service.Imp;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mall.LongTou.common.BusinessException;
 import com.mall.LongTou.common.ExceptionEnum;
+import com.mall.LongTou.common.UserHolder;
 import com.mall.LongTou.dto.OrderCreateDTO;
+import com.mall.LongTou.dto.UserDTO;
 import com.mall.LongTou.entity.*;
 import com.mall.LongTou.mapper.OrdersMapper;
 import com.mall.LongTou.mapper.ProductMapper;
@@ -25,7 +27,7 @@ import java.util.*;
 public class OrderServiceImp extends ServiceImpl<OrdersMapper, Orders> implements OrderService {
 
         @Autowired
-        private IdWorker idWorker;
+        private UserHolder userHolder;
         @Autowired
         private RedisTemplate redisTemplate;
         @Autowired
@@ -40,12 +42,16 @@ public class OrderServiceImp extends ServiceImpl<OrdersMapper, Orders> implement
 
     @Override
     public void createOrder(OrderCreateDTO dto) {
+        //先查库存
+
 
     }
 
     @Override
-    public List<Orders> getUserOrders(Integer userId) {
+    public List<Orders> getUserOrders() {
 
+        UserDTO user = userHolder.getUser();
+        String userId = user.getUserId();
         if (userId == null) {
             throw new BusinessException(ExceptionEnum.USER_CANTOT_NULL);
         }

@@ -11,6 +11,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Data
@@ -34,11 +35,9 @@ public class JwtUtil {
 
     // 生成token
     public String createToken(String username, String userId) {
-        long time = System.currentTimeMillis();
-        Date nowDate = new Date(time);
-        long expireTime = time + expiration*100;
-        Date expireDate = new Date(expireTime);
-
+        long now = System.currentTimeMillis();
+        Date nowDate = new Date(now);
+        Date expireDate = new Date(now + TimeUnit.SECONDS.toMillis(expiration));
         return Jwts.builder()
                 //在token中存入用户信息
                 .setId(userId)

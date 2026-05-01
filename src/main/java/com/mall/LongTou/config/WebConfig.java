@@ -18,7 +18,8 @@ public class WebConfig implements WebMvcConfigurer {
         //添加jwt拦截器
         registry.addInterceptor(jwtInterceptor)
                 .addPathPatterns("/collect/**",
-                        "/cart/**");
+                        "/cart/**",
+                        "/order/**");
                //添加拦截路径   购物车和收藏商品需要拦截
 
     }

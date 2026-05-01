@@ -28,8 +28,8 @@ public class OrdersController {
     }
 
     @GetMapping("/list")
-    public Result<List<Orders>> getUserOrders(@RequestParam @NotNull(message = "用户ID不能为空") Integer userId) {
-        List<Orders> list = orderService.getUserOrders(userId);
+    public Result<List<Orders>> getUserOrders() {
+        List<Orders> list = orderService.getUserOrders();
         return Result.success(list);
     }
 

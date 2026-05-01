@@ -50,6 +50,8 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>1.18.30</version>
+            <scope>provided</scope> <!-- 推荐加上 provided 作用域 -->
         </dependency>
         <dependency>
             <groupId>com.aliyun</groupId>

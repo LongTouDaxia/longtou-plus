@@ -4,8 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mall.LongTou.common.BusinessException;
 import com.mall.LongTou.common.ExceptionEnum;
+import com.mall.LongTou.common.UserHolder;
+import com.mall.LongTou.dto.UserDTO;
 import com.mall.LongTou.entity.Collect;
 import com.mall.LongTou.mapper.CollectMapper;
+import com.mall.LongTou.mapper.UserMapper;
 import com.mall.LongTou.service.CollectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +21,8 @@ public class CollectServiceImpl extends ServiceImpl<CollectMapper,Collect> imple
 
     @Autowired
     private CollectMapper collectMapper;
+    @Autowired
+    private UserHolder userHolder;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -71,7 +76,9 @@ public class CollectServiceImpl extends ServiceImpl<CollectMapper,Collect> imple
     }
 
     @Override
-    public List<Collect> getUserCollects(Integer userId) {
+    public List<Collect> getUserCollects() {
+        UserDTO user = userHolder.getUser();
+        String userId = user.getUserId();
         if (userId == null) {
             throw new BusinessException(ExceptionEnum.USER_CANTOT_NULL);
         }

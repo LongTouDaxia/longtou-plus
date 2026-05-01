@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 @TableName("orders")
 public class Orders {
 
-    @TableId
-    private String orderId;          // 订单号（主键）
+         // 订单号（主键）
+    private String orderId;
 
     private Integer userId;          // 用户ID
 

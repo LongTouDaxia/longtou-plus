@@ -40,9 +40,10 @@ public class SeckillBusinessController {
 
     //重点  TODO
     @PostMapping("/order")
-    public Result<Void> createSeckillOrder(@Valid @RequestBody SeckillOrderDTO dto) {
+    public Result<String> createSeckillOrder(@Valid @RequestBody SeckillOrderDTO dto) {
         //调用秒杀商品服务
-        seckillGoodsService.createSeckillOrder(dto.getUserId(), dto.getSeckillGoodsId(), dto.getQuantity());
-        return Result.success();
+        String ordersId = seckillGoodsService.createSeckillOrder(dto.getUserId(), dto.getSeckillGoodsId(), dto.getQuantity());
+
+        return Result.success(ordersId);
     }
 }

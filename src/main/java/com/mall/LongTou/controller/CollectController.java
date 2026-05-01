@@ -32,8 +32,8 @@ public class CollectController {
     }
 
     @GetMapping("/list")
-    public Result<List<Collect>> getUserCollects(@RequestParam Integer userId) {
-        List<Collect> list = collectService.getUserCollects(userId);
+    public Result<List<Collect>> getUserCollects() {
+        List<Collect> list = collectService.getUserCollects();
         return Result.success(list);
     }
 }

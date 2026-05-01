@@ -56,7 +56,3 @@ jwt:
   secret: "MTE1NjA1THV1L2J1aWxkX3JlbGF0ZWQvSmF2YV9ob3VkdWFuL2phdmFfcHJvamVjdC9sb25ndG91LXBsdXM="
   issuer: "longtou"
   expiration: 7200
-#logging:
-#  level:
-#    org.apache.ibatis: DEBUG
-#    com.mall.xiaomi: DEBUG
