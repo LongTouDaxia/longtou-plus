@@ -1,0 +1,27 @@
+package com.mall.LongTou.vo;
+
+import com.mall.LongTou.entity.SeckillProduct;
+import lombok.Data;
+
+import java.io.Serializable;
+
+/**
+ * @Auther: wdd
+ * @Date: 2020-03-28 20:17
+ * @Description:
+ */
+@Data
+public class SeckillProductVo extends SeckillProduct implements Serializable {
+
+    private String productName;
+
+    private Double productPrice;
+
+    private String productPicture;
+
+    private Long startTime;
+
+    private Long endTime;
+
+
+}
