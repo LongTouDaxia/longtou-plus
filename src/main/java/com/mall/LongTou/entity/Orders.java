@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -29,7 +30,7 @@ public class Orders {
 
     private Integer seckillGoodsId;  // 秒杀商品ID（普通订单为NULL）
 
-    private Double seckillPriceSnapshot; // 秒杀价格快照（普通订单为NULL）
+    private BigDecimal seckillPriceSnapshot; // 秒杀价格快照（普通订单为NULL）
 
     private String productNameSnapshot;  // 商品名称快照（下单时的商品名）
 
