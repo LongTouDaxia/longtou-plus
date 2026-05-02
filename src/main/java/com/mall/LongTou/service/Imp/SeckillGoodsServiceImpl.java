@@ -28,7 +28,13 @@ import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static com.mall.LongTou.util.SeckillKey.SECKILL_STOCK_KEY;
+import static com.mall.LongTou.util.SeckillKey.SECKILL_USER_KEY;
+
 @Slf4j
 @Service
 public class SeckillGoodsServiceImpl extends ServiceImpl<SeckillGoodsMapper, SeckillGoods> implements SeckillGoodsService {
@@ -94,8 +100,8 @@ public class SeckillGoodsServiceImpl extends ServiceImpl<SeckillGoodsMapper, Sec
         if (userId == null || seckillGoodsId == null || quantity == null || quantity <= 0) {
             throw new BusinessException(ExceptionEnum.PARAM_ERROR);
         }
-        String stockKey = "seckill:stock:" + seckillGoodsId;
-        String userKey = "seckill:user:" + seckillGoodsId;
+        String stockKey = SECKILL_STOCK_KEY + seckillGoodsId;
+        String userKey = SECKILL_USER_KEY + seckillGoodsId;
 
         //获取用户状态  0表示库存不足 1表示用户已购买 2表示下单成功
         //redis之星lua教本
@@ -110,14 +116,21 @@ public class SeckillGoodsServiceImpl extends ServiceImpl<SeckillGoodsMapper, Sec
             throw new BusinessException(ExceptionEnum.USER_REPEAT_SECOND_KILL);
         }
 
+        //校验成功  生成订单唯一id
+        String orderToken = UUID.randomUUID().toString().replaceAll("-", "");
+        //向redis中存入该key
+        String key = "seckill:result:" + orderToken;
+        //五分钟后过期
+        redisTemplate.opsForValue().set(key,"processing",5, TimeUnit.MINUTES);
+
         // 3. 发送消息到 RabbitMQ（异步创建订单）
-        SeckillOrderMessage message = new SeckillOrderMessage(userId, seckillGoodsId, quantity);
+        SeckillOrderMessage message = new SeckillOrderMessage(userId, seckillGoodsId, quantity,orderToken);
 
 
         rabbitTemplate.convertAndSend("seckill.exchange", "seckill.order", message);
 
         // 4. 返回一个临时订单号或提示，前端轮询最终结果
-        return "订单生成成功,请排队等候";
+        return orderToken;
 
 
     }

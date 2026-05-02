@@ -37,7 +37,9 @@ public class JwtUtil {
     public String createToken(String username, String userId) {
         long now = System.currentTimeMillis();
         Date nowDate = new Date(now);
+        //过期时间设为两小时后
         Date expireDate = new Date(now + TimeUnit.SECONDS.toMillis(expiration));
+        log.info(expireDate.toString());
         return Jwts.builder()
                 //在token中存入用户信息
                 .setId(userId)

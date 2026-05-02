@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,4 +14,5 @@ public class SeckillOrderMessage implements Serializable {
     private Integer seckillGoodsId;
     private Integer quantity;
 
+    private String orderToken;  //返回前端唯一订单id
 }

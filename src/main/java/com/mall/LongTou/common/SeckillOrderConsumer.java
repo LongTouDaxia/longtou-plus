@@ -1,5 +1,3 @@
-/*
-
 
 package com.mall.LongTou.common;
 
@@ -24,10 +22,15 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
+
+import static com.mall.LongTou.util.SeckillKey.SECKILL_QUEUE;
+import static com.mall.LongTou.util.SeckillKey.SECKILL_TOKEN_KEY;
 
 //先通过消息队列晓峰预减库存 之后在消费者里查数据库
 
@@ -47,9 +50,11 @@ public class SeckillOrderConsumer {
 
     @Autowired
     private OrdersMapper ordersMapper;
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
 
-    @RabbitListener(queues = RabbitMQConfig.SECKILL_QUEUE)
+    @RabbitListener(queues = SECKILL_QUEUE)
     @Transactional(rollbackFor = Exception.class)//开启事务  防止回滚少买
     public void HandleSeckillOrderQueue(SeckillOrderMessage message){
 
@@ -57,6 +62,8 @@ public class SeckillOrderConsumer {
         Integer seckillGoodsId = message.getSeckillGoodsId();
         Integer quantity = message.getQuantity();
         Integer userId = message.getUserId();
+        String orderToken = message.getOrderToken();
+        String key = SECKILL_TOKEN_KEY +orderToken;
 
         // 1. 幂等性检查：是否已经下单成功
         LambdaQueryWrapper<Orders> existWrapper = new LambdaQueryWrapper<Orders>()
@@ -117,8 +124,11 @@ public class SeckillOrderConsumer {
 
         try {
             ordersMapper.insert(order);
-            log.info("下单成功，恭喜！");  //后面监听支付接口
-            return;
+            log.info("用户{}下单成功",userId);
+            //修改key值  告知前端已成功
+            //设置五分钟过期
+            redisTemplate.opsForValue()
+                    .set(key,"success  "+ order.getOrderId(),5, TimeUnit.MINUTES);
         } catch (DuplicateKeyException e) {
             log.warn("用户重复下单, userId={}, seckillGoodsId={}", userId, seckillGoodsId);
             // 如果重复，要回滚刚才扣减的库存？这里简单做法：因为唯一索引阻止了插入，需要回滚事务
@@ -138,4 +148,3 @@ public class SeckillOrderConsumer {
         return System.currentTimeMillis() + "" + userId + (int)(Math.random() * 10000);
     }
 }
-*/
