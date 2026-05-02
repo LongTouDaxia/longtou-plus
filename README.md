@@ -1,6 +1,6 @@
 # 🔥 Seckill System – 电商秒杀系统
 
-**基于 Spring Boot + Redis + RabbitMQ + MySQL 的电商秒杀系统**，支持 JWT 登录、购物车、商品收藏、分类，
+**基于 Spring Boot + Redis + RabbitMQ + MySQL + MyBatis-Plus 的电商秒杀系统**，支持 JWT 登录、购物车、商品收藏、分类，
 
 并通过 **Lua脚本原子扣库存 + 异步消息队列落库 + 延迟队列取消订单** 实现高并发秒杀。
 
@@ -81,6 +81,8 @@ sequenceDiagram
 - 
 - 前端轮询 Redis 极轻量，支持高 QPS
 
+---
+
 ## 🥝订单超时取消（延迟队列）
 
 用户秒杀成功但未支付，30分钟后自动回滚库存。
@@ -106,6 +108,7 @@ sequenceDiagram
     end
 ```
 
+---
 
 ## 🧪 JMeter 压测说明（不强制JWT）
 
@@ -114,6 +117,8 @@ sequenceDiagram
 - 请求头：`Content-Type: application/json`
 - Body：`{"userId": ${__Random(1,10000,userId)}}`
 - 聚合报告确认 **TPS ≈ 700+**
+
+---
 
 ## ⚠️ 备注
 
