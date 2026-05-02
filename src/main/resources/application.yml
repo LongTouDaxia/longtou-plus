@@ -19,7 +19,7 @@ spring:
         # 连接池中的最大空闲连接数
         max-idle: 8
         # 连接池的最大活跃连接数
-        max-active: 8
+        max-active: 20
         # 连接池最大阻塞等待时间，使用 PT 表示 Duration 格式
         max-wait: -1ms
 

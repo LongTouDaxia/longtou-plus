@@ -8,6 +8,9 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static com.mall.LongTou.util.SeckillKey.*;
 
 @Configuration
@@ -46,4 +49,37 @@ public class RabbitMQConfig {
     public Binding seckillBinding() {
         return BindingBuilder.bind(seckillQueue()).to(seckillExchange()).with(SECKILL_ROUTING_KEY).noargs();
     }
+
+    //订单超时取消
+    // 1. 延迟交换机
+    @Bean
+    public CustomExchange delayedExchange() {
+        Map<String, Object> args = new HashMap<>();
+        args.put("x-delayed-type", "direct");  // 底层路由类型
+        return new CustomExchange(
+                "order.delayed.exchange",
+                "x-delayed-message",  // 固定字符串，标识为延迟交换机
+                true,
+                false,
+                args
+        );
+    }
+
+    //延迟队列
+    @Bean
+    public Queue cancelOrderQueue() {
+        return new Queue(CANCEL_QUEUE, true);
+    }
+
+
+    //绑定队列
+
+    @Bean
+    public Binding delayedBinding() {
+        return BindingBuilder.bind(cancelOrderQueue())
+                .to(delayedExchange())
+                .with(CANCEL_ROUTING_KEY)
+                .noargs(); // 对于CustomExchange，使用noargs()方法
+    }
+
 }

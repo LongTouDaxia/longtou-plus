@@ -10,8 +10,6 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 public interface SeckillGoodsService extends IService<SeckillGoods> {
-    // 乐观锁扣减库存
-    boolean decreaseStock(Integer seckillGoodsId, Integer quantity, Integer version);
     // 根据活动ID查询商品
     List<SeckillGoodsVO> getByActivityId(Integer activityId);
 

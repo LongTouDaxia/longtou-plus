@@ -1,6 +1,7 @@
 
 package com.mall.LongTou.common;
-
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -20,17 +21,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
-import static com.mall.LongTou.util.SeckillKey.SECKILL_QUEUE;
-import static com.mall.LongTou.util.SeckillKey.SECKILL_TOKEN_KEY;
+import static com.mall.LongTou.util.SeckillKey.*;
 
 //先通过消息队列晓峰预减库存 之后在消费者里查数据库
 
@@ -50,20 +52,23 @@ public class SeckillOrderConsumer {
 
     @Autowired
     private OrdersMapper ordersMapper;
+
     @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
 
     @RabbitListener(queues = SECKILL_QUEUE)
     @Transactional(rollbackFor = Exception.class)//开启事务  防止回滚少买
-    public void HandleSeckillOrderQueue(SeckillOrderMessage message){
+    public void HandleSeckillOrderQueue(SeckillOrderMessage message) {
 
         //从消息中获取订单所需信息
         Integer seckillGoodsId = message.getSeckillGoodsId();
         Integer quantity = message.getQuantity();
         Integer userId = message.getUserId();
         String orderToken = message.getOrderToken();
-        String key = SECKILL_TOKEN_KEY +orderToken;
+        String key = SECKILL_TOKEN_KEY + orderToken;
 
         // 1. 幂等性检查：是否已经下单成功
         LambdaQueryWrapper<Orders> existWrapper = new LambdaQueryWrapper<Orders>()
@@ -124,23 +129,31 @@ public class SeckillOrderConsumer {
 
         try {
             ordersMapper.insert(order);
-            log.info("用户{}下单成功",userId);
+            log.info("用户{}下单成功", userId);
             //修改key值  告知前端已成功
             //设置五分钟过期
-            redisTemplate.opsForValue()
-                    .set(key,"success  "+ order.getOrderId(),5, TimeUnit.MINUTES);
+            stringRedisTemplate.opsForValue()
+                    .set(key, "success:" + order.getOrderId(), 5, TimeUnit.MINUTES);
+            // 发送延迟消息
+            MessageProperties messageProperities = new MessageProperties();
+            //设置延迟时间
+            messageProperities.setDelay(30 * 60 * 1000);
+            Message delaymessage = new Message(order.getOrderId().getBytes(), messageProperities);
+
+            rabbitTemplate.convertAndSend(DELAYED_EXCHANGE,
+                    CANCEL_ROUTING_KEY,//设置路由key
+                    delaymessage);
+            log.info("订单超时取消消息已发送，将在30分钟后触发检查，orderId: {}", order.getOrderId());
+            return;
+
+
         } catch (DuplicateKeyException e) {
             log.warn("用户重复下单, userId={}, seckillGoodsId={}", userId, seckillGoodsId);
-            // 如果重复，要回滚刚才扣减的库存？这里简单做法：因为唯一索引阻止了插入，需要回滚事务
-            // 但事务会自动回滚，库存已经扣减了，会造成少卖。改进：先检查订单是否存在再扣库存。
+
             // 实际生产中建议把 唯一性检查放在扣库存之前（比如 Redis 里已经标记过了，这里只是兜底）。
             throw new RuntimeException("重复下单");
         }
-
     }
-
-
-
     //简单的订单id生成器  也可以改成雪花算法
     // 加一个IdWorker 但其实依旧是调用一个函数的事
     private String generateOrderId(Integer userId) {

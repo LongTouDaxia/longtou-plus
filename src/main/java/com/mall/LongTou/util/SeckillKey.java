@@ -12,4 +12,10 @@ public class SeckillKey {
     public static final String SECKILL_TOKEN_KEY = "seckill:result:";
     public static final String SECKILL_USER_KEY = "seckill:user:";
     public static final String SECKILL_STOCK_KEY = "seckill:stock:";
+    // 定义一个交换机名称，例如 "order.delayed.exchange"
+    public static final String DELAYED_EXCHANGE = "order.delayed.exchange";
+    // 定义一个队列名称，用于接收需取消的订单号，例如 "order.cancel.queue"
+    public static final String CANCEL_QUEUE = "order.cancel.queue";
+    // 定义一个路由键，例如 "order.cancel.routingkey"
+    public static final String CANCEL_ROUTING_KEY = "order.cancel.routingkey";
 }

@@ -20,6 +20,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,8 +33,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static com.mall.LongTou.util.SeckillKey.SECKILL_STOCK_KEY;
-import static com.mall.LongTou.util.SeckillKey.SECKILL_USER_KEY;
+import static com.mall.LongTou.util.SeckillKey.*;
 
 @Slf4j
 @Service
@@ -54,14 +54,28 @@ public class SeckillGoodsServiceImpl extends ServiceImpl<SeckillGoodsMapper, Sec
     @Autowired
     private UserHolder userHolder;
     @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
 
     private DefaultRedisScript<Long> stockLuaScript;
+
+    //注解  表示bean生成后即执行这个方法
     @PostConstruct
-    public void init() {
+    public void init(){
+
+        LuaInit();
+        log.info("Lua初始化成功");
+
+
+        initSeckillStockToRedis();
+        log.info("秒杀商品预热成功");
+
+    }
+
+
+    private void LuaInit() {
 
         stockLuaScript = new DefaultRedisScript<>();
 
@@ -81,14 +95,14 @@ public class SeckillGoodsServiceImpl extends ServiceImpl<SeckillGoodsMapper, Sec
     }
 
     //信息预热  存入秒杀商品库存
-    @PostConstruct
-    public void initSeckillStockToRedis() {
+
+    private void initSeckillStockToRedis() {
         List<SeckillGoods> seckillGoodsList = seckillGoodsMapper.selectList(null);
         for (SeckillGoods goods : seckillGoodsList) {
-            String stockKey = "seckill:stock:" + goods.getSeckillGoodsId();
-            redisTemplate.opsForValue().set(stockKey, goods.getSeckillStock());
+            String stockKey = SECKILL_STOCK_KEY + goods.getSeckillGoodsId();
+            stringRedisTemplate.opsForValue().set(stockKey, goods.getSeckillStock().toString());
         }
-        log.info("秒杀库存初始化完成");
+
     }
 
 
@@ -105,7 +119,7 @@ public class SeckillGoodsServiceImpl extends ServiceImpl<SeckillGoodsMapper, Sec
 
         //获取用户状态  0表示库存不足 1表示用户已购买 2表示下单成功
         //redis之星lua教本
-        Long result = redisTemplate.execute(stockLuaScript,
+        Long result = stringRedisTemplate.execute(stockLuaScript,
                 Arrays.asList(stockKey, userKey),
                 userId.toString());
 
@@ -119,9 +133,9 @@ public class SeckillGoodsServiceImpl extends ServiceImpl<SeckillGoodsMapper, Sec
         //校验成功  生成订单唯一id
         String orderToken = UUID.randomUUID().toString().replaceAll("-", "");
         //向redis中存入该key
-        String key = "seckill:result:" + orderToken;
+        String key = SECKILL_TOKEN_KEY + orderToken;
         //五分钟后过期
-        redisTemplate.opsForValue().set(key,"processing",5, TimeUnit.MINUTES);
+        stringRedisTemplate.opsForValue().set(key,"processing",5, TimeUnit.MINUTES);
 
         // 3. 发送消息到 RabbitMQ（异步创建订单）
         SeckillOrderMessage message = new SeckillOrderMessage(userId, seckillGoodsId, quantity,orderToken);
@@ -133,10 +147,6 @@ public class SeckillGoodsServiceImpl extends ServiceImpl<SeckillGoodsMapper, Sec
         return orderToken;
 
 
-    }
-    @Override
-    public boolean decreaseStock(Integer seckillGoodsId, Integer quantity, Integer version) {
-        return false;
     }
 
     @Override

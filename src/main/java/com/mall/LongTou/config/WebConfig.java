@@ -20,7 +20,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/collect/**",
                         "/cart/**",
                         "/order/**",
-                        "/seckill/order");
+                        "/seckill/order",
+                        "/seckill/result");
                //添加拦截路径   购物车和收藏商品需要拦截
 
     }

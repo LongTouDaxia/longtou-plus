@@ -7,6 +7,9 @@ public enum ExceptionEnum {
     REQUEST_TOO_FREQUENT(429, "请求过于频繁"),
     PARAM_ERROR(430,"参数不合法"),
     TOKEN_CREATE_ERROR(431,"令牌生成失败"),
+    GET_RESULT_ERROR(432,"结果已过期或不存在"),
+    RESULT_PROCESSING(433,"处理中，请稍后重试"),
+    DONT_KNOW_ERROR(434,"未知状态"),
 
     // 轮播图
     GET_CAROUSEL_NOT_FOUND(10001, "获取轮播图失败"),
@@ -56,6 +59,7 @@ public enum ExceptionEnum {
     ORDER_CANNOT_CANCEL(70006, "订单当前状态不可取消"),
     ORDER_PAY_EXPIRE(70007, "订单支付已超时"),
     ORDER_PAY_FAILED(70008, "订单支付失败"),
+    ORDER_ROOLBACK_ERROR(70009,"订单回滚异常"),
 
     // 购物车
     SHOPPINGCART_IS_UNLL(80001,"购物车为空"),
