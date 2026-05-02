@@ -5,7 +5,7 @@
 并通过 **Lua脚本原子扣库存 + 异步消息队列落库 + 延迟队列取消订单** 实现高并发秒杀。
 
 
-> JMeter 压测：秒杀接口吞吐量 **700+ TPS**
+> JMeter 压测：秒杀接口吞吐量 **700+ QPS**
 
 ---
 
@@ -46,13 +46,13 @@ sequenceDiagram
     else 有资格
         API->>Redis: 存储 tokenId -> processing
         API-->>User: 返回临时订单ID tokenId
-        User->>API: 轮询 GET /seckill/result/{tempId}
+        User->>API: 轮询 GET /seckill/result/{tokenId}
         Note over API,Redis: 异步落库
         API->>MQ: 发送订单消息SeckillOrderMessage
         MQ-->>Consumer: 消费
         Consumer->>DB: 幂等检查（防止一人多单）
         Consumer->>DB: 生成真实订单，获得orderId
-        Consumer->>Redis: 存储 tokenId -> success:orderId
+        Consumer->>Redis: 存储订单唯一tokenId -> success:orderId
         API->>Redis: 查询结果
         alt 已有orderId
             Redis-->>API: 返回orderId
@@ -66,12 +66,12 @@ sequenceDiagram
 
 ### 2. 关键步骤说明
 
-| 步骤 | 描述                                     |
-|------|----------------------------------------|
-| ① Lua原子检查 | 一次性检查库存、用户是否重复下单，通过则扣库存并记录临时资格         |
-| ② 返回临时ID | 生成 tokenId存入redis并立即返回前端，后续所有状态通过它查询   |
+| 步骤 | 描述                                      |
+|------|-----------------------------------------|
+| ① Lua原子检查 | 一次性检查库存、用户是否重复下单，通过则扣库存并记录临时资格          |
+| ② 返回临时ID | 生成 tokenId存入redis并立即返回前端，订单状态通过它查询      |
 | ③ 异步落库 | 将订单消息推入 RabbitMQ，由消费者幂等建单（数据库唯一索引保证不重复） |
-| ④ 结果回写 | 消费者写入真实 orderId 到 Redis，前端轮询获得最终结果     |
+| ④ 结果回写 | 消费者写入真实 orderId 到 Redis，前端轮询获得最终结果      |
 
 **为什么这样设计？**
 
@@ -106,7 +106,6 @@ sequenceDiagram
     end
 ```
 
-**幂等保障**：取消前再次检查订单状态，避免重复回滚。
 
 ## 🧪 JMeter 压测说明（不强制JWT）
 
@@ -118,6 +117,6 @@ sequenceDiagram
 
 ## ⚠️ 备注
 
-- **务必修改 `application.yml` 中的数据库/Redis/RabbitMQ 地址**
+- **务必修改 `application.yml` 中的数据库/Redis/RabbitMQ 的相关配置**
 - 
 - **觉得不错就点个⭐吧**
