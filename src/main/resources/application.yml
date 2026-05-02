@@ -2,11 +2,11 @@ server:
   port: 8080
 spring:
   datasource:
-    name: xiaomi
+    name: longtoumall
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: 115605Liu
-    url: jdbc:mysql://localhost:3306/xiaomi?useUnicode=true&serverTimezone=Asia/Shanghai&characterEncoding=utf8&autoReconnect=true&useSSL=false&allowMultiQueries=true
+    url: jdbc:mysql://localhost:3306/longtoumall?useUnicode=true&serverTimezone=Asia/Shanghai&characterEncoding=utf8&autoReconnect=true&useSSL=false&allowMultiQueries=true
 
   # Redis 配置
   redis:
