@@ -1,3 +1,6 @@
+/*
+
+
 package com.mall.LongTou.common;
 
 
@@ -114,6 +117,7 @@ public class SeckillOrderConsumer {
 
         try {
             ordersMapper.insert(order);
+            log.info("下单成功，恭喜！");  //后面监听支付接口
             return;
         } catch (DuplicateKeyException e) {
             log.warn("用户重复下单, userId={}, seckillGoodsId={}", userId, seckillGoodsId);
@@ -134,3 +138,4 @@ public class SeckillOrderConsumer {
         return System.currentTimeMillis() + "" + userId + (int)(Math.random() * 10000);
     }
 }
+*/

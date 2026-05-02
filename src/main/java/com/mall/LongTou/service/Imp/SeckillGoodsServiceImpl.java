@@ -15,6 +15,7 @@ import com.mall.LongTou.mapper.SeckillActivityMapper;
 import com.mall.LongTou.mapper.SeckillGoodsMapper;
 import com.mall.LongTou.service.SeckillGoodsService;
 import com.mall.LongTou.vo.SeckillGoodsVO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
+@Slf4j
 @Service
 public class SeckillGoodsServiceImpl extends ServiceImpl<SeckillGoodsMapper, SeckillGoods> implements SeckillGoodsService {
 
@@ -55,7 +56,8 @@ public class SeckillGoodsServiceImpl extends ServiceImpl<SeckillGoodsMapper, Sec
     private DefaultRedisScript<Long> stockLuaScript;
     @PostConstruct
     public void init() {
-        DefaultRedisScript<Long> stockLuaScript = new DefaultRedisScript<>();
+
+        stockLuaScript = new DefaultRedisScript<>();
 
         stockLuaScript.setScriptText(
                 "local stock_key = KEYS[1]\n" +
@@ -71,6 +73,18 @@ public class SeckillGoodsServiceImpl extends ServiceImpl<SeckillGoodsMapper, Sec
         );
         stockLuaScript.setResultType(Long.class);
     }
+
+    //信息预热  存入秒杀商品库存
+    @PostConstruct
+    public void initSeckillStockToRedis() {
+        List<SeckillGoods> seckillGoodsList = seckillGoodsMapper.selectList(null);
+        for (SeckillGoods goods : seckillGoodsList) {
+            String stockKey = "seckill:stock:" + goods.getSeckillGoodsId();
+            redisTemplate.opsForValue().set(stockKey, goods.getSeckillStock());
+        }
+        log.info("秒杀库存初始化完成");
+    }
+
 
     //创建秒杀订单
     @Override
@@ -88,6 +102,7 @@ public class SeckillGoodsServiceImpl extends ServiceImpl<SeckillGoodsMapper, Sec
         Long result = redisTemplate.execute(stockLuaScript,
                 Arrays.asList(stockKey, userKey),
                 userId.toString());
+
         if (result == 0) {
             throw new BusinessException(ExceptionEnum.SECKILL_STOCK_INSUFFICIENT);
         }
