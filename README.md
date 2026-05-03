@@ -28,7 +28,7 @@
 
 ### 1. 秒杀时序图
 
-```mermaid
+
 ```mermaid
 sequenceDiagram
     participant User as 前端
