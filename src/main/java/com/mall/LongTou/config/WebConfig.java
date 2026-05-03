@@ -14,7 +14,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Resource
     private JwtInterceptor jwtInterceptor;
 
-   /* @Override
+    @Override
     public void addInterceptors(InterceptorRegistry registry) {
         //添加jwt拦截器
         registry.addInterceptor(jwtInterceptor)
@@ -25,7 +25,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "/seckill/result");
                //添加拦截路径   购物车和收藏商品需要拦截
 
-    }*/
+    }
 
     //语序跨域请求
    @Override
