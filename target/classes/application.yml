@@ -15,13 +15,13 @@ spring:
     lettuce:
       pool:
         # 连接池中的最小空闲连接数
-        min-idle: 0
+        min-idle: 5
         # 连接池中的最大空闲连接数
-        max-idle: 8
+        max-idle: 20
         # 连接池的最大活跃连接数
-        max-active: 20
+        max-active: 30
         # 连接池最大阻塞等待时间，使用 PT 表示 Duration 格式
-        max-wait: -1ms
+        max-wait: 2000ms
 
 jackson:
   date-format: yyyy-MM-dd HH:mm:ss

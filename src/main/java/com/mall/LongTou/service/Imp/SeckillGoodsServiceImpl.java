@@ -19,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
@@ -27,10 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.mall.LongTou.util.SeckillKey.*;
@@ -108,8 +104,8 @@ public class SeckillGoodsServiceImpl extends ServiceImpl<SeckillGoodsMapper, Sec
 
     //创建秒杀订单
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public String createSeckillOrder(@NotNull Integer userId, Integer seckillGoodsId, Integer quantity) {
+    @Transactional(rollbackFor = BusinessException.class)
+    public Map<String, String> createSeckillOrder(@NotNull Integer userId, Integer seckillGoodsId, Integer quantity) {
         // 1. 参数校验
         if (userId == null || seckillGoodsId == null || quantity == null || quantity <= 0) {
             throw new BusinessException(ExceptionEnum.PARAM_ERROR);
@@ -132,19 +128,17 @@ public class SeckillGoodsServiceImpl extends ServiceImpl<SeckillGoodsMapper, Sec
 
         //校验成功  生成订单唯一id
         String orderToken = UUID.randomUUID().toString().replaceAll("-", "");
-        //向redis中存入该key
-        String key = SECKILL_TOKEN_KEY + orderToken;
-        //五分钟后过期
-        stringRedisTemplate.opsForValue().set(key,"processing",5, TimeUnit.MINUTES);
-
+       
         // 3. 发送消息到 RabbitMQ（异步创建订单）
         SeckillOrderMessage message = new SeckillOrderMessage(userId, seckillGoodsId, quantity,orderToken);
 
 
         rabbitTemplate.convertAndSend("seckill.exchange", "seckill.order", message);
 
-        // 4. 返回一个临时订单号或提示，前端轮询最终结果
-        return orderToken;
+        Map<String, String> map = new HashMap<>();
+        map.put("tokenId",orderToken);
+        map.put("wsUrl","/ws/seckill/"+orderToken);//告诉前端完整路径
+        return map;
 
 
     }

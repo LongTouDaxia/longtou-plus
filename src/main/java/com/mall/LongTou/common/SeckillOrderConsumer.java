@@ -68,7 +68,6 @@ public class SeckillOrderConsumer {
         Integer quantity = message.getQuantity();
         Integer userId = message.getUserId();
         String orderToken = message.getOrderToken();
-        String key = SECKILL_TOKEN_KEY + orderToken;
 
         // 1. 幂等性检查：是否已经下单成功
         LambdaQueryWrapper<Orders> existWrapper = new LambdaQueryWrapper<Orders>()
@@ -130,10 +129,11 @@ public class SeckillOrderConsumer {
         try {
             ordersMapper.insert(order);
             log.info("用户{}下单成功", userId);
-            //修改key值  告知前端已成功
-            //设置五分钟过期
-            stringRedisTemplate.opsForValue()
-                    .set(key, "success:" + order.getOrderId(), 5, TimeUnit.MINUTES);
+            //通知前端订单信息 websocket实现
+            String pushMessage = "SUCCESS:"+order.getOrderId();
+            SeckillOrderResultWebSocketHandler.pushResult(orderToken, pushMessage);
+
+
             // 发送延迟消息
             MessageProperties messageProperities = new MessageProperties();
             //设置延迟时间
